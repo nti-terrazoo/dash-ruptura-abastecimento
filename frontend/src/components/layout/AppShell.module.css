@@ -1,0 +1,23 @@
+.content {
+  margin-left: var(--sidebar-width);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  transition: margin-left 0.25s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.content.expanded {
+  margin-left: var(--sidebar-width-collapsed);
+}
+
+.main {
+  padding: 18px 24px 40px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  max-width: 1400px;
+}

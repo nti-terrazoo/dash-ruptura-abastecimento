@@ -1,0 +1,49 @@
+.segRow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.segRowGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px 20px;
+}
+
+.criticoField {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border2);
+}
+
+.criticoLabel {
+  color: var(--muted);
+}
+
+.criticoValue {
+  color: var(--text);
+  font-weight: 600;
+  text-align: right;
+}
+
+.chartControls {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.topList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.topSegList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}

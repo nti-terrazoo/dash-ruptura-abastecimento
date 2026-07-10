@@ -1,0 +1,35 @@
+.pill {
+  background: rgba(45, 107, 74, 0.07);
+  border: 1px solid #c5d9c5;
+  border-radius: 14px;
+  padding: 4px 11px;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: rgba(26, 46, 34, 0.55);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.pill:hover {
+  color: var(--text);
+}
+
+.pill.on {
+  background: var(--g1);
+  color: #ffffff;
+  border-color: var(--g1);
+}
+
+/* Variante para uso sobre fundo verde escuro (ex: header da aba Segmentos). */
+.onDark {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.onDark.on {
+  background: #ffffff;
+  color: var(--g1);
+  border-color: #ffffff;
+}

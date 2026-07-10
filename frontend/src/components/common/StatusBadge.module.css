@@ -1,0 +1,40 @@
+.badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-size: 9px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ok {
+  background: rgba(45, 107, 74, 0.1);
+  color: var(--g1);
+}
+
+.atencao {
+  background: rgba(255, 209, 102, 0.1);
+  color: #ffd166;
+}
+
+.alerta {
+  background: rgba(244, 168, 93, 0.12);
+  color: #f4a85d;
+}
+
+.critico {
+  background: rgba(224, 85, 85, 0.12);
+  color: #c03030;
+}
+
+/* Variante usada dentro de headers verdes (ex: aba Ruptura Segmentos), onde
+   as cores padrao nao teriam contraste suficiente sobre o fundo escuro. */
+.onDark.ok {
+  background: rgba(168, 240, 200, 0.2);
+  color: #a8f0c8;
+}
+
+.onDark.critico {
+  background: rgba(255, 100, 100, 0.2);
+  color: #ff9999;
+}

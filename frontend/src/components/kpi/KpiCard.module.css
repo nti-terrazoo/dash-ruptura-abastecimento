@@ -1,0 +1,81 @@
+.card {
+  background: var(--g1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 13px;
+  padding: 17px 20px;
+  position: relative;
+  overflow: hidden;
+  transition:
+    border-color 0.2s,
+    transform 0.15s;
+}
+
+.card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.3);
+  opacity: 0.7;
+}
+
+.card:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.label {
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 7px;
+}
+
+.value {
+  font-family: "AllerDisplay", sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  color: #ffffff;
+}
+
+.centered {
+  text-align: center;
+}
+
+.sub {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 5px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  margin-top: 5px;
+  font-weight: 600;
+}
+
+.tagBad {
+  background: rgba(255, 100, 100, 0.25);
+  color: #ffaaaa;
+}
+
+.tagGood {
+  background: rgba(125, 212, 160, 0.2);
+  color: #7dd4a0;
+}
+
+.extra {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

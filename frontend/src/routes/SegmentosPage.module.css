@@ -1,0 +1,83 @@
+.header {
+  background: var(--g1);
+  border-radius: 14px;
+  padding: 18px 22px;
+  margin-bottom: 14px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.headerTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.segName {
+  font-family: "AllerDisplay", sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: #7dd4a0;
+}
+
+.headerStats {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.headerStat {
+  text-align: right;
+}
+
+.headerStatLabel {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 3px;
+}
+
+.headerStatValue {
+  font-family: "AllerDisplay", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.pillsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.controlsRow {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.bridgeItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 11px;
+  border-bottom: 1px solid var(--border2);
+}
+
+.bridgeItem:last-child {
+  border-bottom: none;
+}
+
+.bridgeDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+}

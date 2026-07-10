@@ -1,0 +1,9 @@
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+oracledb==2.5.1
+pydantic==2.10.4
+pydantic-settings==2.7.1
+cachetools==5.5.0
+
+pytest==8.3.4
+httpx==0.28.1

@@ -1,0 +1,32 @@
+/* Tokens portados 1:1 do dashboard legado (dados/dash 26.06.html, :root). */
+:root {
+  --bg: #f0f4f0;
+  --bg2: #e4ece4;
+  --bg3: #d8e4d8;
+  --card: rgba(255, 255, 255, 1);
+  --card2: rgba(255, 255, 255, 0.8);
+  --border: rgba(45, 107, 74, 0.18);
+  --border2: rgba(45, 107, 74, 0.12);
+  --g1: #2d6b4a;
+  --g2: #3a8a5c;
+  --g3: #1a4a32;
+  --text: #1a2e22;
+  --muted: rgba(26, 46, 34, 0.55);
+  --red: #e05555;
+  --yellow: #c87010;
+  --orange: #e8a050;
+  --blue: #3a7fd5;
+
+  /* Cores das 5 categorias da bridge (waterfall) - fixas no legado. */
+  --bridge-crit-pedido: #ff4444;
+  --bridge-crit-sem-pedido: #ff9999;
+  --bridge-cd-insuficiente: #f4a030;
+  --bridge-cd-atende: #34c97a;
+  --bridge-estoque-negativo: #ffd166;
+  --bridge-meta: #2d6b4a;
+  --bridge-atual: #ff6b6b;
+
+  --sidebar-width: 210px;
+  --sidebar-width-collapsed: 56px;
+  --drawer-width: 460px;
+}
