@@ -10,8 +10,18 @@ import { Skeleton } from "../components/common/Skeleton";
 import { FornecedorRankingChart } from "../components/charts/FornecedorRankingChart";
 import { useSelectedDate } from "../hooks/useSelectedDate";
 import { formatCurrency, formatDde, formatPercent } from "../lib/format";
-import { SEGMENTOS } from "../lib/segmentos";
+import { SEGMENTOS, segmentColor } from "../lib/segmentos";
 import styles from "./FornecedoresPage.module.css";
+
+function truncate(s: string, n: number) {
+  return s.length > n ? `${s.slice(0, n)}…` : s;
+}
+
+function pctColor(p: number) {
+  if (p > 30) return "#ff6b6b";
+  if (p > 15) return "#ffd166";
+  return "#5ed9a0";
+}
 
 export function FornecedoresPage() {
   const { selectedDate } = useSelectedDate();
@@ -20,12 +30,46 @@ export function FornecedoresPage() {
 
   if (query.isError) return <ErrorState error={query.error} />;
   const data = query.data;
+  const top10 = data?.ranking.slice(0, 10) ?? [];
+  const segLabel = segmento === "TODOS" ? "Geral" : segmento;
 
   const columns: DataTableColumn<FornecedorRow>[] = [
-    { key: "fornecedor", header: "Fornecedor", render: (r) => r.fornecedor },
-    { key: "pct", header: "%", align: "right", render: (r) => <span style={{ color: r.cor }}>{formatPercent(r.percentual)}</span> },
-    { key: "valor", header: "R$", align: "right", render: (r) => formatCurrency(r.valor) },
-    { key: "dde", header: "DDE", align: "right", render: (r) => formatDde(r.dde) },
+    {
+      key: "fornecedor",
+      header: "Fornecedor",
+      render: (r, i) => <span style={{ fontWeight: i < 3 ? 700 : 400, fontSize: 10 }}>{truncate(r.fornecedor, 30)}</span>,
+    },
+    ...(segmento !== "TODOS"
+      ? [
+          {
+            key: "seg",
+            header: "Seg.",
+            render: () => <span style={{ fontSize: 9, color: segmentColor(segmento) }}>{segmento}</span>,
+          } as DataTableColumn<FornecedorRow>,
+        ]
+      : []),
+    {
+      key: "valor",
+      header: "R$",
+      align: "right",
+      render: (r) => <span style={{ fontFamily: "'DM Mono', monospace", color: "#f4a85d" }}>{formatCurrency(r.valor)}</span>,
+    },
+    {
+      key: "pct",
+      header: "%",
+      align: "right",
+      render: (r, i) => (
+        <span style={{ fontFamily: "'DM Mono', monospace", color: pctColor(r.percentual), fontWeight: i < 3 ? 700 : 400 }}>
+          {formatPercent(r.percentual)}
+        </span>
+      ),
+    },
+    {
+      key: "dde",
+      header: "DDE",
+      align: "right",
+      render: (r) => <span style={{ fontFamily: "'DM Mono', monospace", color: "var(--muted)" }}>{formatDde(r.dde)}</span>,
+    },
   ];
 
   return (
@@ -43,41 +87,44 @@ export function FornecedoresPage() {
 
       {!data ? (
         <div className={styles.destaqueGrid}>
-          <Skeleton height={80} />
-          <Skeleton height={80} />
-          <Skeleton height={80} />
+          <Skeleton height={100} />
+          <Skeleton height={100} />
+          <Skeleton height={100} />
         </div>
       ) : (
         <div className={styles.destaqueGrid}>
           {data.destaques.map((f, i) => (
             <div key={f.fornecedor} className={styles.destaqueCard}>
               <div className={styles.destaqueRank}>Maior Ruptura · {i + 1}º</div>
-              <div className={styles.destaqueName}>{f.fornecedor}</div>
-              <div className={styles.destaqueValue}>
-                {formatPercent(f.percentual)} · {formatCurrency(f.valor)}
+              <div className={styles.destaqueName}>{truncate(f.fornecedor, 32)}</div>
+              <div className={styles.destaqueValue}>{formatCurrency(f.valor)}</div>
+              <div className={styles.destaqueSub}>
+                {formatPercent(f.percentual)} · {segLabel}
               </div>
             </div>
           ))}
         </div>
       )}
 
-      <Card title="Top 10 Fornecedores">
-        {!data ? (
-          <Skeleton height={280} />
-        ) : (
-          <ChartContainer height={280} title="Top 10 Fornecedores">
-            <FornecedorRankingChart rows={data.ranking} />
-          </ChartContainer>
-        )}
-      </Card>
+      <div className="grid-2">
+        <Card title="Top 10 Fornecedores" actions={<span className={styles.cbPill}>{segLabel}</span>}>
+          {!data ? (
+            <Skeleton height={320} />
+          ) : (
+            <ChartContainer height={320} title="Top 10 Fornecedores">
+              <FornecedorRankingChart rows={data.ranking} />
+            </ChartContainer>
+          )}
+        </Card>
 
-      <Card title="Ranking Completo">
-        {!data ? (
-          <Skeleton height={300} />
-        ) : (
-          <DataTable columns={columns} rows={data.ranking} keyExtractor={(r) => r.fornecedor} showRank />
-        )}
-      </Card>
+        <Card title="Ranking + DDE">
+          {!data ? (
+            <Skeleton height={320} />
+          ) : (
+            <DataTable columns={columns} rows={top10} keyExtractor={(r) => r.fornecedor} showRank />
+          )}
+        </Card>
+      </div>
     </div>
   );
 }
