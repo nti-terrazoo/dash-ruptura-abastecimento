@@ -1,49 +1,297 @@
-.segRow {
+.topRow {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
+  grid-template-columns: 3fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+  align-items: stretch;
 }
 
-.segRowGrid {
+@media (max-width: 900px) {
+  .topRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Card "Ruptura por Segmento" ── */
+.segCard {
+  padding: 0;
+  overflow: hidden;
+}
+
+.segHeader {
+  background: var(--g1);
+  padding: 9px 17px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.segHeaderTitle {
+  color: #ffffff;
+  font-size: 11px;
+  font-family: "AllerDisplay", sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.segHeaderPill {
+  color: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.15);
+  font-size: 9px;
+  padding: 3px 8px;
+  border-radius: 7px;
+  font-family: "DM Mono", monospace;
+}
+
+.segBody {
+  padding: 10px 17px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px 20px;
+  gap: 4px 12px;
 }
 
-.criticoField {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
+.segRowItem {
   padding: 4px 0;
   border-bottom: 1px solid var(--border2);
 }
 
-.criticoLabel {
-  color: var(--muted);
+.segRowTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px;
 }
 
-.criticoValue {
+.segRowLabel {
+  font-size: 9px;
+  font-weight: 700;
   color: var(--text);
+  letter-spacing: 0.2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.segRowPct {
+  font-family: "DM Mono", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.segRowBottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 1px;
+}
+
+.segRowValue {
+  font-size: 8px;
+  color: rgba(26, 46, 34, 0.4);
+}
+
+/* ── Card "Item Mais Crítico" ── */
+.criticoHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.criticoDot {
+  width: 7px;
+  height: 7px;
+  background: #ff6b6b;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.criticoTitle {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.criticoDate {
+  font-size: 8px;
+  margin-left: auto;
+  color: var(--g1);
+  background: rgba(45, 107, 74, 0.1);
+  padding: 3px 8px;
+  border-radius: 7px;
+  font-family: "DM Mono", monospace;
+}
+
+.criticoBody {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.criticoFieldLabel {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.criticoProduto {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.criticoRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.criticoLoja {
+  font-size: 11px;
   font-weight: 600;
-  text-align: right;
+  color: #ffd166;
+}
+
+.criticoSeg {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.criticoValor {
+  font-family: "AllerDisplay", sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: #ff6b6b;
+}
+
+.criticoStatus {
+  font-size: 9px;
+  color: #e05555;
+  font-weight: 600;
 }
 
 .chartControls {
   display: flex;
   gap: 6px;
   align-items: center;
+  flex-wrap: wrap;
+}
+
+.chartControlsSep {
+  font-size: 9px;
+  color: var(--muted);
+  margin: 0 2px;
+}
+
+.chartRangePill {
+  font-size: 9px;
+  color: rgba(26, 46, 34, 0.55);
+  background: rgba(45, 107, 74, 0.08);
+  padding: 3px 8px;
+  border-radius: 7px;
+  font-family: "DM Mono", monospace;
+  margin-left: 2px;
+}
+
+/* ── KPI "% Ruptura" / "Valor em Ruptura": valor principal + linha s/CD + linha c/CD ── */
+.kpiMainValue {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.kpiSubLabel {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 4px;
+}
+
+.kpiSecondary {
+  font-size: 17px;
+  font-weight: 600;
+  color: #ffcc88;
+  margin-top: 2px;
+}
+
+.kpiSecondarySuffix {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ── KPI "DDE Geral": top fornecedores ── */
+.ddeSubLabel {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  margin-top: 3px;
 }
 
 .topList {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.8);
+  gap: 3px;
+  margin-top: 8px;
 }
 
+.ddeFornRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ddeFornName {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.65);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 115px;
+}
+
+.ddeFornValue {
+  font-family: "DM Mono", monospace;
+  font-size: 9px;
+  color: #7dd4a0;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* ── KPI "Top 3 Segmentos" ── */
 .topSegList {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.segTopRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+
+.segTopName {
+  font-weight: 700;
+  color: #ffd166;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.segTopPct {
+  font-family: "DM Mono", monospace;
+  font-weight: 700;
+  color: #ff9999;
+  flex-shrink: 0;
 }

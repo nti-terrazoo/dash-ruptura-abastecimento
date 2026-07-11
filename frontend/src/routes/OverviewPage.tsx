@@ -4,11 +4,10 @@ import { Card } from "../components/common/Card";
 import { ChartContainer } from "../components/common/ChartContainer";
 import { ErrorState } from "../components/common/ErrorState";
 import { FilterPill } from "../components/common/FilterPill";
-import { LabeledProgressBar } from "../components/common/ProgressBar";
 import { KpiCardSkeleton, Skeleton } from "../components/common/Skeleton";
 import { KpiCard } from "../components/kpi/KpiCard";
 import { SeriesChart } from "../components/charts/SeriesChart";
-import { formatCurrency, formatDde, formatPercent } from "../lib/format";
+import { formatCurrency, formatDateFull, formatDateShort, formatDde, formatPercent } from "../lib/format";
 import { useSelectedDate } from "../hooks/useSelectedDate";
 import styles from "./OverviewPage.module.css";
 
@@ -35,6 +34,16 @@ export function OverviewPage() {
 
   const data = overviewQuery.data;
 
+  const activeSeries = showSemCd ? semCdSeries.data?.pontos : comCdSeries.data?.pontos;
+  const rangeLabel =
+    activeSeries && activeSeries.length > 0
+      ? `${formatDateShort(activeSeries[0].data)}–${formatDateShort(activeSeries[activeSeries.length - 1].data)}`
+      : null;
+
+  const criticoSegCor = data?.item_critico
+    ? data.ruptura_por_segmento.find((s) => s.segmento === data.item_critico?.segmento)?.cor
+    : undefined;
+
   return (
     <div>
       <div className="grid-4">
@@ -49,27 +58,54 @@ export function OverviewPage() {
           <>
             <KpiCard
               label="% Ruptura"
-              value={formatPercent(data.ruptura_sem_cd.percentual)}
+              value={
+                <>
+                  <span className={styles.kpiMainValue} style={{ color: "#ff9999" }}>
+                    {formatPercent(data.ruptura_sem_cd.percentual)}
+                  </span>
+                  <div className={styles.kpiSubLabel}>s/ CD</div>
+                  {data.ruptura_com_cd.percentual > 0 && (
+                    <div className={styles.kpiSecondary}>
+                      {formatPercent(data.ruptura_com_cd.percentual)}{" "}
+                      <span className={styles.kpiSecondarySuffix}>c/ CD</span>
+                    </div>
+                  )}
+                </>
+              }
               tag={{
                 text:
                   data.ruptura_sem_cd.percentual <= data.meta_percentual
                     ? "✓ Dentro da meta"
-                    : `+${(data.ruptura_sem_cd.percentual - data.meta_percentual).toFixed(2)}pp acima meta`,
+                    : `▲ +${(data.ruptura_sem_cd.percentual - data.meta_percentual).toFixed(2)}pp acima meta`,
                 tone: data.ruptura_sem_cd.percentual <= data.meta_percentual ? "good" : "bad",
               }}
-              sub={`c/ CD: ${formatPercent(data.ruptura_com_cd.percentual)}`}
+              sub={`${formatDateFull(data.data_referencia)} · Meta: ${data.meta_percentual}%`}
             />
             <KpiCard
               label="Valor em Ruptura"
-              value={formatCurrency(data.ruptura_sem_cd.valor)}
-              valueColor="#ffd166"
-              sub={`c/ CD: ${formatCurrency(data.ruptura_com_cd.valor)}`}
+              value={
+                <>
+                  <span className={styles.kpiMainValue} style={{ color: "#ffd166" }}>
+                    {formatCurrency(data.ruptura_sem_cd.valor)}
+                  </span>
+                  <div className={styles.kpiSubLabel}>s/ CD</div>
+                  {data.ruptura_com_cd.valor > 0 && (
+                    <div className={styles.kpiSecondary}>
+                      {formatCurrency(data.ruptura_com_cd.valor)}{" "}
+                      <span className={styles.kpiSecondarySuffix}>c/ CD</span>
+                    </div>
+                  )}
+                </>
+              }
+              sub={formatDateFull(data.data_referencia)}
             />
-            <KpiCard label="DDE Geral" value={formatDde(data.dde_geral)} valueColor="#7dd4a0" centered>
+            <KpiCard label="DDE Geral" value={<span style={{ fontSize: 40 }}>{formatDde(data.dde_geral)}</span>} valueColor="#7dd4a0" centered>
+              <div className={styles.ddeSubLabel}>Dias de estoque · Hoje</div>
               <div className={styles.topList}>
                 {data.top_fornecedores_dde.map((f) => (
-                  <div key={f.fornecedor}>
-                    {f.fornecedor} · {formatDde(f.dde)}
+                  <div key={f.fornecedor} className={styles.ddeFornRow}>
+                    <span className={styles.ddeFornName}>{f.fornecedor.split(" ").slice(0, 2).join(" ")}</span>
+                    <span className={styles.ddeFornValue}>{formatDde(f.dde)}</span>
                   </div>
                 ))}
               </div>
@@ -77,8 +113,17 @@ export function OverviewPage() {
             <KpiCard label="Top 3 Segmentos (%)" value="">
               <div className={styles.topSegList}>
                 {data.top_segmentos.map((s, i) => (
-                  <div key={s.segmento} style={{ fontSize: i === 0 ? 16 : i === 1 ? 13 : 11, color: "#ffffff" }}>
-                    {s.segmento} · {formatPercent(s.percentual)}
+                  <div
+                    key={s.segmento}
+                    className={styles.segTopRow}
+                    style={i > 0 ? { paddingTop: 4, borderTop: "1px solid rgba(255,255,255,.1)" } : undefined}
+                  >
+                    <span className={styles.segTopName} style={{ fontSize: i === 0 ? 16 : i === 1 ? 13 : 11 }}>
+                      {s.segmento.replace("PET ", "")}
+                    </span>
+                    <span className={styles.segTopPct} style={{ fontSize: i === 0 ? 18 : i === 1 ? 14 : 12 }}>
+                      {formatPercent(s.percentual, 1)}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -87,63 +132,77 @@ export function OverviewPage() {
         )}
       </div>
 
-      <div className="grid-3-2">
-        <Card title="Ruptura por Segmento">
+      <div className={styles.topRow}>
+        <Card style={{ padding: 0, overflow: "hidden" }}>
+          <div className={styles.segHeader}>
+            <span className={styles.segHeaderTitle}>Ruptura por Segmento</span>
+            <span className={styles.segHeaderPill}>hoje</span>
+          </div>
           {!data ? (
-            <Skeleton height={140} />
+            <div style={{ padding: "10px 17px" }}>
+              <Skeleton height={140} />
+            </div>
           ) : (
-            <div className={styles.segRowGrid}>
+            <div className={styles.segBody}>
               {data.ruptura_por_segmento.map((s) => (
-                <LabeledProgressBar
-                  key={s.segmento}
-                  label={s.segmento}
-                  valueLabel={formatPercent(s.percentual)}
-                  percent={s.percentual}
-                  color={s.cor}
-                />
+                <div key={s.segmento} className={styles.segRowItem}>
+                  <div className={styles.segRowTop}>
+                    <span className={styles.segRowLabel}>{s.segmento}</span>
+                    <span className={styles.segRowPct} style={{ color: s.cor }}>
+                      {formatPercent(s.percentual, 1)}
+                    </span>
+                  </div>
+                  <div className={styles.segRowBottom}>
+                    <span className={styles.segRowValue}>{formatCurrency(s.valor)}</span>
+                  </div>
+                </div>
               ))}
             </div>
           )}
         </Card>
 
-        <Card title="Item Mais Crítico">
+        <Card style={{ padding: "12px 14px" }}>
+          <div className={styles.criticoHeader}>
+            <span className={styles.criticoDot} />
+            <span className={styles.criticoTitle}>Item Mais Crítico</span>
+            <span className={styles.criticoDate}>{data ? formatDateFull(data.data_referencia) : "—"}</span>
+          </div>
           {!data ? (
             <Skeleton height={140} />
           ) : !data.item_critico ? (
             <div style={{ fontSize: 11, color: "var(--muted)" }}>Nenhum item crítico encontrado.</div>
           ) : (
-            <div>
-              <div className={styles.criticoField}>
-                <span className={styles.criticoLabel}>Produto</span>
-                <span className={styles.criticoValue}>{data.item_critico.produto ?? "—"}</span>
+            <div className={styles.criticoBody}>
+              <div>
+                <div className={styles.criticoFieldLabel}>Produto</div>
+                <div className={styles.criticoProduto}>{data.item_critico.produto ?? "—"}</div>
               </div>
-              <div className={styles.criticoField}>
-                <span className={styles.criticoLabel}>Loja</span>
-                <span className={styles.criticoValue}>{data.item_critico.loja ?? "—"}</span>
+              <div className={styles.criticoRow}>
+                <div>
+                  <div className={styles.criticoFieldLabel}>Loja</div>
+                  <div className={styles.criticoLoja}>{data.item_critico.loja ?? "—"}</div>
+                </div>
+                <div>
+                  <div className={styles.criticoFieldLabel}>Seg.</div>
+                  <div className={styles.criticoSeg} style={{ color: criticoSegCor ?? "var(--g1)" }}>
+                    {data.item_critico.segmento?.replace("PET ", "") ?? "—"}
+                  </div>
+                </div>
               </div>
-              <div className={styles.criticoField}>
-                <span className={styles.criticoLabel}>Segmento</span>
-                <span className={styles.criticoValue}>{data.item_critico.segmento ?? "—"}</span>
+              <div>
+                <div className={styles.criticoFieldLabel}>Valor Ruptura</div>
+                <div className={styles.criticoValor}>{formatCurrency(data.item_critico.valor)}</div>
               </div>
-              <div className={styles.criticoField}>
-                <span className={styles.criticoLabel}>Fornecedor</span>
-                <span className={styles.criticoValue}>{data.item_critico.fornecedor ?? "—"}</span>
-              </div>
-              <div className={styles.criticoField}>
-                <span className={styles.criticoLabel}>Valor</span>
-                <span className={styles.criticoValue}>{formatCurrency(data.item_critico.valor)}</span>
-              </div>
-              <div className={styles.criticoField} style={{ borderBottom: "none" }}>
-                <span className={styles.criticoLabel}>Status</span>
-                <span className={styles.criticoValue}>{data.item_critico.status_label ?? data.item_critico.situacao ?? "—"}</span>
-              </div>
+              {(data.item_critico.status_label ?? data.item_critico.situacao) && (
+                <div className={styles.criticoStatus}>{data.item_critico.status_label ?? data.item_critico.situacao}</div>
+              )}
             </div>
           )}
         </Card>
       </div>
 
       <Card
-        title="Evolução Diária"
+        title="Evolução Diária — % Ruptura + DDE"
         actions={
           <div className={styles.chartControls}>
             {DAYS_OPTIONS.map((d) => (
@@ -151,19 +210,21 @@ export function OverviewPage() {
                 {d}d
               </FilterPill>
             ))}
+            <span className={styles.chartControlsSep}>|</span>
             <FilterPill active={showSemCd} onClick={toggleSemCd}>
-              s/CD
+              s/ CD
             </FilterPill>
             <FilterPill active={showComCd} onClick={toggleComCd}>
-              c/CD
+              c/ CD
             </FilterPill>
+            {rangeLabel && <span className={styles.chartRangePill}>{rangeLabel}</span>}
           </div>
         }
       >
         {!data || (showSemCd && semCdSeries.isLoading) || (showComCd && comCdSeries.isLoading) ? (
-          <Skeleton height={280} />
+          <Skeleton height={340} />
         ) : (
-          <ChartContainer height={280} title="Evolução Diária">
+          <ChartContainer height={340} title="Evolução Diária — % Ruptura + DDE">
             <SeriesChart
               points={semCdSeries.data?.pontos ?? []}
               pointsCd={comCdSeries.data?.pontos}
