@@ -115,20 +115,23 @@ export function BridgePage() {
       <Drawer
         open={drilldownStatus !== null}
         onClose={() => setDrilldownStatus(null)}
+        eyebrow="Bridge — Itens"
         title={drilldownStatus ?? "Itens"}
       >
-        {drilldownQuery.isLoading && <Skeleton height={200} />}
-        {drilldownQuery.data && (
-          <DataTable
-            columns={[
-              { key: "produto", header: "Produto", render: (r) => r.produto ?? "—" },
-              { key: "loja", header: "Loja", render: (r) => r.loja ?? "—" },
-              { key: "valor", header: "R$", align: "right", render: (r) => formatCurrency(r.valor) },
-            ]}
-            rows={drilldownQuery.data.itens}
-            keyExtractor={(r, i) => `${r.cod_produto}-${r.cod_unidade}-${i}`}
-          />
-        )}
+        <div style={{ padding: "14px 18px" }}>
+          {drilldownQuery.isLoading && <Skeleton height={200} />}
+          {drilldownQuery.data && (
+            <DataTable
+              columns={[
+                { key: "produto", header: "Produto", render: (r) => r.produto ?? "—" },
+                { key: "loja", header: "Loja", render: (r) => r.loja ?? "—" },
+                { key: "valor", header: "R$", align: "right", render: (r) => formatCurrency(r.valor) },
+              ]}
+              rows={drilldownQuery.data.itens}
+              keyExtractor={(r, i) => `${r.cod_produto}-${r.cod_unidade}-${i}`}
+            />
+          )}
+        </div>
       </Drawer>
     </div>
   );

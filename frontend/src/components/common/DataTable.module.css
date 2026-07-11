@@ -32,7 +32,9 @@
   background: rgba(45, 107, 74, 0.04);
 }
 
-.alignRight {
+/* Especificidade ".tbl .alignRight" (2 classes) para vencer ".tbl th"
+   (elemento + classe) - senao o text-align:left do th sempre venceria. */
+.tbl .alignRight {
   text-align: right;
 }
 

@@ -8,6 +8,7 @@ import { KpiCardSkeleton, Skeleton } from "../components/common/Skeleton";
 import { KpiCard } from "../components/kpi/KpiCard";
 import { SeriesChart } from "../components/charts/SeriesChart";
 import { formatCurrency, formatDateFull, formatDateShort, formatDde, formatPercent } from "../lib/format";
+import { segmentColor } from "../lib/segmentos";
 import { useSelectedDate } from "../hooks/useSelectedDate";
 import styles from "./OverviewPage.module.css";
 
@@ -40,9 +41,7 @@ export function OverviewPage() {
       ? `${formatDateShort(activeSeries[0].data)}–${formatDateShort(activeSeries[activeSeries.length - 1].data)}`
       : null;
 
-  const criticoSegCor = data?.item_critico
-    ? data.ruptura_por_segmento.find((s) => s.segmento === data.item_critico?.segmento)?.cor
-    : undefined;
+  const criticoSegCor = data?.item_critico?.segmento ? segmentColor(data.item_critico.segmento) : undefined;
 
   return (
     <div>

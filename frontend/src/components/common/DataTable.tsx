@@ -49,7 +49,7 @@ export function DataTable<T>({
             className={onRowClick ? styles.clickable : undefined}
             onClick={onRowClick ? () => onRowClick(row) : undefined}
           >
-            {showRank && <td className={styles.rank}>{index + 1}</td>}
+            {showRank && <td className={styles.rank}>{String(index + 1).padStart(2, "0")}</td>}
             {columns.map((col) => (
               <td key={col.key} className={col.align === "right" ? styles.alignRight : undefined}>
                 {col.render(row, index)}

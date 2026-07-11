@@ -1,96 +1,234 @@
+/* ── Cards "Lojas Dentro da Meta" / "Acima da Meta" ── */
+.countPillOk {
+  font-size: 9px;
+  font-family: "DM Mono", monospace;
+  padding: 3px 8px;
+  border-radius: 7px;
+  color: var(--g1);
+  background: rgba(45, 107, 74, 0.1);
+}
+
+.countPillCrit {
+  font-size: 9px;
+  font-family: "DM Mono", monospace;
+  padding: 3px 8px;
+  border-radius: 7px;
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.08);
+}
+
+.emptyMsg {
+  font-size: 11px;
+  color: var(--muted);
+}
+
 .miniGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
 .miniCard {
-  background: var(--bg2);
-  border: 1px solid var(--border2);
-  border-radius: 10px;
-  padding: 9px 11px;
+  flex: 1;
+  min-width: 130px;
+  border-radius: 8px;
+  padding: 8px 12px;
   cursor: pointer;
-  transition:
-    transform 0.15s,
-    border-color 0.15s;
+  transition: background 0.2s;
 }
 
-.miniCard:hover {
-  transform: translateY(-1px);
-  border-color: var(--border);
+.miniCardOk {
+  background: rgba(94, 217, 160, 0.08);
+  border: 1px solid rgba(94, 217, 160, 0.2);
+}
+
+.miniCardOk:hover {
+  background: rgba(94, 217, 160, 0.18);
+}
+
+.miniCardCrit {
+  background: rgba(255, 107, 107, 0.08);
+  border: 1px solid rgba(255, 107, 107, 0.25);
+}
+
+.miniCardCrit:hover {
+  background: rgba(255, 107, 107, 0.15);
 }
 
 .miniName {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #3a4a3e;
+  margin-bottom: 3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .miniValue {
+  font-family: "AllerDisplay", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.miniSub {
+  font-size: 9px;
+  color: #3a4a3e;
   font-family: "DM Mono", monospace;
-  font-size: 10px;
-  color: var(--muted);
-  margin-bottom: 6px;
+  margin-top: 1px;
 }
 
+/* ── Drawer: KPIs ── */
 .drawerKpis {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.drawerKpi {
-  background: rgba(45, 107, 74, 0.06);
-  border-radius: 10px;
-  padding: 10px 12px;
+  display: flex;
+  gap: 16px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border2);
 }
 
 .drawerKpiLabel {
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 10px;
   color: var(--muted);
-  margin-bottom: 4px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 .drawerKpiValue {
   font-family: "AllerDisplay", sans-serif;
-  font-size: 17px;
+  font-size: 20px;
   font-weight: 700;
-  color: var(--text);
+}
+
+/* ── Drawer: Segmentos Ofensores ── */
+.drawerSection {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border2);
+}
+
+.drawerSectionLast {
+  padding: 14px 18px;
+}
+
+.segSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.segResetBtn {
+  font-size: 9px;
+  background: rgba(45, 107, 74, 0.15);
+  border: 1px solid rgba(45, 107, 74, 0.3);
+  border-radius: 6px;
+  padding: 2px 8px;
+  cursor: pointer;
+  color: var(--g1);
+  font-weight: 600;
 }
 
 .offensorRow {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 10px;
-  padding: 6px 0;
+  padding: 6px 8px;
+  border-radius: 7px;
+  cursor: pointer;
+  margin-bottom: 4px;
+  transition: background 0.15s;
 }
 
 .offensorLabel {
-  width: 110px;
   font-size: 11px;
-  color: var(--text);
-  flex-shrink: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-weight: 600;
+}
+
+.offensorBarWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.offensorBarTrack {
+  width: 60px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+}
+
+.offensorBarFill {
+  height: 4px;
+  border-radius: 2px;
 }
 
 .offensorValue {
   font-family: "DM Mono", monospace;
   font-size: 10px;
-  color: var(--muted);
-  width: 70px;
+  color: #f4a85d;
+  min-width: 44px;
   text-align: right;
-  flex-shrink: 0;
 }
 
-.sectionGap {
-  margin-top: 22px;
+.offensorChevron {
+  font-size: 10px;
+  color: rgba(26, 46, 34, 0.4);
+}
+
+/* ── Drawer: Top 10 Itens ── */
+.itemsList {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.itemRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.itemRow:last-child {
+  border-bottom: none;
+}
+
+.itemRank {
+  font-size: 9px;
+  color: var(--muted);
+  font-family: "DM Mono", monospace;
+  flex-shrink: 0;
+  margin-right: 7px;
+}
+
+.itemInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.itemName {
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+  color: #3a4a3e;
+}
+
+.itemSeg {
+  font-size: 8px;
+  color: rgba(26, 46, 34, 0.55);
+  margin-top: 1px;
+}
+
+.itemValue {
+  font-family: "DM Mono", monospace;
+  font-size: 11px;
+  color: rgba(26, 46, 34, 0.7);
+  flex-shrink: 0;
+  margin-left: 8px;
 }
