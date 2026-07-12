@@ -159,6 +159,7 @@ export interface FornecedorHistoricoDia {
 
 export interface FornecedorHistorico {
   fornecedor: string;
+  dde: number | null;
   dias: FornecedorHistoricoDia[];
 }
 

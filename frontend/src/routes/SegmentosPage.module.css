@@ -1,19 +1,26 @@
+/* ── Header (faixa verde) ── */
 .header {
   background: var(--g1);
-  border-radius: 14px;
-  padding: 18px 22px;
-  margin-bottom: 14px;
-  position: sticky;
-  top: 0;
-  z-index: 5;
+  border-radius: 12px;
+  padding: 10px 18px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
-.headerTop {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  gap: 12px;
+.segBlock {
+  flex: 1;
+  min-width: 200px;
+}
+
+.segEyebrow {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
 }
 
 .segName {
@@ -29,16 +36,11 @@
   flex-wrap: wrap;
 }
 
-.headerStat {
-  text-align: right;
-}
-
 .headerStatLabel {
-  font-size: 9px;
-  text-transform: uppercase;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.6);
   letter-spacing: 0.5px;
-  color: rgba(255, 255, 255, 0.55);
-  margin-bottom: 3px;
+  text-transform: uppercase;
 }
 
 .headerStatValue {
@@ -48,36 +50,248 @@
   color: #ffffff;
 }
 
+.headerStatusCol {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 4px;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-size: 9px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.statusBadgeOk {
+  background: rgba(168, 240, 200, 0.2);
+  color: #a8f0c8;
+}
+
+.statusBadgeCrit {
+  background: rgba(255, 100, 100, 0.2);
+  color: #ff9999;
+}
+
+.statusBadgeNeutral {
+  background: rgba(45, 107, 74, 0.06);
+  color: #7a8b80;
+}
+
+.headerRight {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+  flex: 2;
+  min-width: 300px;
+}
+
 .pillsRow {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 14px;
+  justify-content: flex-end;
 }
 
 .controlsRow {
   display: flex;
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.bridgeItem {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 6px 0;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.controlsLabel {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.3px;
+}
+
+.controlsSep {
+  margin-left: 4px;
+}
+
+.cbPill {
+  font-size: 9px;
+  color: var(--g1);
+  background: rgba(45, 107, 74, 0.1);
+  padding: 3px 8px;
+  border-radius: 7px;
+  font-family: "DM Mono", monospace;
+}
+
+/* ── Gráfico principal + painel lateral ── */
+.mainRow {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 900px) {
+  .mainRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sidePanel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bridgeCard {
+  background: var(--card);
+  border: 1px solid #c5d9c5;
+  border-left: 3px solid var(--bc, #2d6b4a);
+  border-radius: 8px;
+  padding: 9px 12px;
+}
+
+.bridgeCardLabel {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--bc, #2d6b4a);
+}
+
+.bridgeCardPp {
+  font-family: "AllerDisplay", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--bc, #2d6b4a);
+  margin-top: 2px;
+}
+
+.bridgeCardValue {
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+.topItemCard {
+  background: rgba(255, 209, 102, 0.06);
+  border: 1px solid rgba(255, 209, 102, 0.2);
+  border-radius: 13px;
+  padding: 17px;
+}
+
+.topItemEyebrow {
+  font-size: 9px;
+  color: #ffd166;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.topItemName {
+  font-size: 10px;
+  font-weight: 700;
+  color: #3a4a3e;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.topItemLoja {
+  font-size: 9px;
+  color: #ffd166;
+  margin-bottom: 2px;
+}
+
+.topItemValue {
+  font-family: "AllerDisplay", sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #f4a85d;
+}
+
+.topItemPct {
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.topItemEmpty {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+/* ── Tabela "Top 10 Fornecedores — Últimos 3 Dias" ── */
+.fornTableWrap {
+  overflow-x: auto;
+}
+
+.fornTable {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
   font-size: 11px;
-  border-bottom: 1px solid var(--border2);
 }
 
-.bridgeItem:last-child {
-  border-bottom: none;
+.fornTable th {
+  padding: 5px 9px;
+  color: rgba(26, 46, 34, 0.5);
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+  border-bottom: 1px solid #c5d9c5;
 }
 
-.bridgeDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-  margin-right: 6px;
+.fornTable td {
+  padding: 6px 9px;
+}
+
+.fornDayGroupHeader {
+  text-align: center;
+  color: var(--g1);
+  font-size: 9px;
+}
+
+.fornDaySubHeader {
+  text-align: right;
+  font-size: 8px;
+}
+
+.fornRank {
+  font-family: "DM Mono", monospace;
+  font-size: 9px;
+  color: #2d6b4a;
+  opacity: 0.5;
+}
+
+.fornNameCell {
+  font-size: 9px;
+  font-weight: 600;
+  color: #2d6b4a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+.fornDayPct {
+  text-align: right;
+  font-family: "DM Mono", monospace;
+  font-size: 9px;
+  color: #2d6b4a;
+  font-weight: 600;
+}
+
+.fornDayValue {
+  text-align: right;
+  font-family: "DM Mono", monospace;
+  font-size: 9px;
+  color: #3a8a5c;
+}
+
+.fornDayDde {
+  text-align: right;
+  font-family: "DM Mono", monospace;
+  font-size: 9px;
+  color: #5a9a70;
 }

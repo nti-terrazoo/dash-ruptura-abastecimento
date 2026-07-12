@@ -2,7 +2,7 @@ import datetime
 
 from fastapi import APIRouter, Depends, Query
 
-from app.routers.common import get_days_window, get_reference_date
+from app.routers.common import get_reference_date, get_segmento_days_window
 from app.schemas.dashboard import SegmentoDetailResponse, SegmentoSeriesResponse
 from app.services import dashboard_service
 
@@ -18,7 +18,7 @@ def segmento_detail(segmento: str, data_referencia: datetime.date = Depends(get_
 def segmento_series(
     segmento: str,
     data_referencia: datetime.date = Depends(get_reference_date),
-    days: int = Depends(get_days_window),
+    days: int = Depends(get_segmento_days_window),
     cd: bool = Query(False),
 ):
     return dashboard_service.get_segmento_series(segmento, data_referencia, dias=days, com_cd=cd)

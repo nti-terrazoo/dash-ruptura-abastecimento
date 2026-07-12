@@ -159,6 +159,7 @@ class FornecedorHistoricoDia(BaseModel):
 
 class FornecedorHistorico(BaseModel):
     fornecedor: str
+    dde: float | None
     dias: list[FornecedorHistoricoDia]
 
 

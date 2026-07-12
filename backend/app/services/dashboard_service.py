@@ -370,6 +370,12 @@ def get_bridge_drilldown(
 
 
 def _top_fornecedores_ultimos_dias(seg: str, data_referencia: datetime.date, dias: int = 3) -> list[dict]:
+    # DDE nao varia por dia na tabela do HTML legado (sempre o snapshot atual
+    # de D.DDE_FORN_MAP, dash 26.06.html linha 2760) - mesma fonte usada em
+    # get_fornecedores().
+    dde_by_forn = {
+        r.get("nome_fantasia_fornecedor"): r.get("dias_estoque") for r in raw_data.get_dde_fornecedor(data_referencia)
+    }
     datas = [data_referencia - datetime.timedelta(days=i) for i in range(dias)]
     por_forn: dict[str, dict[datetime.date, dict]] = {}
     for d in datas:
@@ -398,6 +404,7 @@ def _top_fornecedores_ultimos_dias(seg: str, data_referencia: datetime.date, dia
     return [
         {
             "fornecedor": forn,
+            "dde": dde_by_forn.get(forn),
             "dias": [
                 {"data": d, "valor": dias_map[d]["valor"], "percentual": dias_map[d]["percentual"]}
                 for d in datas
@@ -408,23 +415,19 @@ def _top_fornecedores_ultimos_dias(seg: str, data_referencia: datetime.date, dia
     ]
 
 
-def get_segmento_series(
-    segmento: str, data_referencia: datetime.date, dias: int = 30, com_cd: bool = False
-) -> dict:
-    seg = norm_seg(segmento)
-    inicio = data_referencia - datetime.timedelta(days=dias - 1)
-
+def _segmento_series_pontos(
+    seg: str, inicio: datetime.date, fim: datetime.date, com_cd: bool
+) -> list[dict]:
     grafico_rows = (
-        raw_data.get_planilha_grafico_cd_range(inicio, data_referencia)
+        raw_data.get_planilha_grafico_cd_range(inicio, fim)
         if com_cd
-        else raw_data.get_planilha_grafico_range(inicio, data_referencia)
+        else raw_data.get_planilha_grafico_range(inicio, fim)
     )
     dde_by_date = {
         r["data_referencia"]: r.get("dias_estoque")
-        for r in raw_data.get_dde_segmento_range(inicio, data_referencia)
+        for r in raw_data.get_dde_segmento_range(inicio, fim)
         if norm_seg(r.get("segmento")) == seg
     }
-
     pontos = [
         {
             "data": r["data_referencia"],
@@ -436,6 +439,28 @@ def get_segmento_series(
         if norm_seg(r.get("segmento")) == seg
     ]
     pontos.sort(key=lambda p: p["data"])
+    return pontos
+
+
+def get_segmento_series(
+    segmento: str, data_referencia: datetime.date, dias: int = 30, com_cd: bool = False
+) -> dict:
+    """dias=0 e o modo "mes atual" (padrao da aba Ruptura Segmentos no HTML
+    legado, RS_DAYS=0): usa do dia 1 do mes de data_referencia ate hoje, com
+    fallback para uma janela rolante de 31 dias se o mes corrente nao tiver
+    nenhum ponto (mesma regra do `selRS()` original, dash 26.06.html linhas
+    2560-2569)."""
+    seg = norm_seg(segmento)
+    if dias == 0:
+        inicio = data_referencia.replace(day=1)
+        pontos = _segmento_series_pontos(seg, inicio, data_referencia, com_cd)
+        if not pontos:
+            inicio = data_referencia - datetime.timedelta(days=31)
+            pontos = _segmento_series_pontos(seg, inicio, data_referencia, com_cd)
+    else:
+        inicio = data_referencia - datetime.timedelta(days=dias - 1)
+        pontos = _segmento_series_pontos(seg, inicio, data_referencia, com_cd)
+
     return {"dias": dias, "com_cd": com_cd, "pontos": pontos}
 
 

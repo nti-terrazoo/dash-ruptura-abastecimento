@@ -144,7 +144,13 @@ export function useSegmentoDetail(date: string | undefined, segmento: string | n
   });
 }
 
-export function useSegmentoSeries(date: string | undefined, segmento: string | null, days: 15 | 30 | 60, comCd: boolean) {
+export function useSegmentoSeries(
+  date: string | undefined,
+  segmento: string | null,
+  days: 0 | 30 | 60,
+  comCd: boolean,
+  enabled = true,
+) {
   return useQuery({
     queryKey: queryKeys.segmentoSeries(date, segmento ?? "", days, comCd),
     queryFn: () =>
@@ -153,7 +159,7 @@ export function useSegmentoSeries(date: string | undefined, segmento: string | n
         days,
         cd: comCd,
       }),
-    enabled: Boolean(segmento),
+    enabled: Boolean(segmento) && enabled,
     ...defaultQueryOptions,
   });
 }
