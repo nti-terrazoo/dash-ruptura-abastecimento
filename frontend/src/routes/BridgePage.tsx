@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { useBridge, useBridgeDrilldown, useLojas } from "../api/queries";
 import type { BridgeMode, BridgeStatusItem } from "../api/types";
 import { Card } from "../components/common/Card";
@@ -20,6 +20,11 @@ const MODES: { value: BridgeMode; label: string }[] = [
   { value: "loja", label: "Por Loja" },
 ];
 
+// Selecionados por padrao ao abrir cada aba, para a tela ja exibir algo em
+// vez do skeleton vazio esperando um clique do usuario.
+const DEFAULT_SEGMENTO = "ACESSORIOS";
+const DEFAULT_LOJA_NOME = "AFRICANOS";
+
 export function BridgePage() {
   const { selectedDate } = useSelectedDate();
   const [mode, setMode] = useState<BridgeMode>("geral");
@@ -32,8 +37,24 @@ export function BridgePage() {
 
   function changeMode(next: BridgeMode) {
     setMode(next);
-    setChave(null);
+    if (next === "segmento") {
+      setChave(DEFAULT_SEGMENTO);
+    } else if (next === "loja") {
+      const africanos = lojasQuery.data?.lojas.find((l) => l.nome === DEFAULT_LOJA_NOME);
+      setChave(africanos?.cod_unidade ?? lojasQuery.data?.lojas[0]?.cod_unidade ?? null);
+    } else {
+      setChave(null);
+    }
   }
+
+  // Se o usuario entrar em "Por Loja" antes da lista de lojas carregar, essa
+  // troca de aba nao consegue resolver o cod_unidade de AFRICANOS ainda -
+  // preenche assim que os dados chegarem.
+  useEffect(() => {
+    if (mode !== "loja" || chave !== null || !lojasQuery.data) return;
+    const africanos = lojasQuery.data.lojas.find((l) => l.nome === DEFAULT_LOJA_NOME);
+    setChave(africanos?.cod_unidade ?? lojasQuery.data.lojas[0]?.cod_unidade ?? null);
+  }, [mode, chave, lojasQuery.data]);
 
   if (bridgeQuery.isError) return <ErrorState error={bridgeQuery.error} />;
   const data = bridgeQuery.data;
