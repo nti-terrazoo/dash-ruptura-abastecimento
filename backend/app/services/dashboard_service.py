@@ -237,11 +237,13 @@ def get_loja_detail(data_referencia: datetime.date, cod_unidade: str) -> dict | 
 
 
 def get_fornecedores(data_referencia: datetime.date, segmento: str = "TODOS") -> dict:
-    """Ranking de fornecedores por % de ruptura. Fonte primaria:
-    VW_DASH_PLANILHA_GERAL (permite filtrar por segmento). Se nao houver
-    linhas (ex. segmento sem correspondencia), cai para VW_DASH_FORNECEDORES
-    (sem quebra por segmento) - mesma relacao primaria/fallback do HTML
-    original entre base_geral e base_forn.
+    """Ranking de fornecedores por valor (R$) em ruptura - mesmo criterio do
+    HTML legado (`D.FORN = Object.values(fornMap).sort((a,b)=>b.v-a.v)`, dash
+    26.06.html linha 1430). Fonte primaria: VW_DASH_PLANILHA_GERAL (permite
+    filtrar por segmento). Se nao houver linhas (ex. segmento sem
+    correspondencia), cai para VW_DASH_FORNECEDORES (sem quebra por segmento)
+    - mesma relacao primaria/fallback do HTML original entre base_geral e
+    base_forn.
 
     Nota: quando um fornecedor aparece em mais de um segmento, o percentual
     agregado usa media ponderada por valor (mais estavel que "ultimo valor
@@ -288,7 +290,7 @@ def get_fornecedores(data_referencia: datetime.date, segmento: str = "TODOS") ->
                 "cor": fornecedor_color(percentual),
             }
         )
-    ranking.sort(key=lambda x: x["percentual"], reverse=True)
+    ranking.sort(key=lambda x: x["valor"], reverse=True)
 
     return {
         "data_referencia": data_referencia,
@@ -301,6 +303,11 @@ def get_fornecedores(data_referencia: datetime.date, segmento: str = "TODOS") ->
 def _bridge_official_totals(
     data_referencia: datetime.date, mode: str, chave: str | None
 ) -> tuple[float, float, float | None]:
+    # A meta do waterfall e sempre 10% (meta geral), mesmo no modo "segmento"
+    # - o HTML legado sempre desenha a partir da meta geral de 10% ali
+    # (comentario original: "brOrig=D.BRIDGE; // sempre usa meta geral de
+    # 10%", dash 26.06.html linha 2336), independente da meta propria do
+    # segmento (SEG_METAS). Nao usar SEG_METAS.get(seg) aqui.
     if mode == "geral":
         rows = raw_data.get_dia_a_dia(data_referencia)
         kpi = _kpi_from_rows(rows)
@@ -308,7 +315,7 @@ def _bridge_official_totals(
     if mode == "segmento":
         seg = norm_seg(chave or "")
         vals = get_segmentos_today(data_referencia).get(seg, {"valor": 0.0, "percentual": 0.0})
-        return vals["percentual"], vals["valor"], SEG_METAS.get(seg)
+        return vals["percentual"], vals["valor"], 10
     if mode == "loja":
         loja = next(
             (l for l in get_lojas(data_referencia)["lojas"] if str(l["cod_unidade"]) == str(chave)), None

@@ -66,7 +66,7 @@ def test_loja_status_thresholds(percentual, esperado):
 
 @pytest.mark.parametrize(
     "percentual,esperado_cor",
-    [(0, "#2d6b4a"), (15, "#2d6b4a"), (15.01, "#c87010"), (30, "#c87010"), (30.01, "#e05555")],
+    [(0, "#5ed9a0"), (15, "#5ed9a0"), (15.01, "#ffd166"), (30, "#ffd166"), (30.01, "#ff6b6b")],
 )
 def test_fornecedor_color_thresholds(percentual, esperado_cor):
     assert fornecedor_color(percentual) == esperado_cor

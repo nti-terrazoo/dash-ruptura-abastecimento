@@ -17,12 +17,6 @@ function truncate(s: string, n: number) {
   return s.length > n ? `${s.slice(0, n)}…` : s;
 }
 
-function pctColor(p: number) {
-  if (p > 30) return "#ff6b6b";
-  if (p > 15) return "#ffd166";
-  return "#5ed9a0";
-}
-
 export function FornecedoresPage() {
   const { selectedDate } = useSelectedDate();
   const [segmento, setSegmento] = useState("TODOS");
@@ -59,7 +53,7 @@ export function FornecedoresPage() {
       header: "%",
       align: "right",
       render: (r, i) => (
-        <span style={{ fontFamily: "'DM Mono', monospace", color: pctColor(r.percentual), fontWeight: i < 3 ? 700 : 400 }}>
+        <span style={{ fontFamily: "'DM Mono', monospace", color: r.cor, fontWeight: i < 3 ? 700 : 400 }}>
           {formatPercent(r.percentual)}
         </span>
       ),

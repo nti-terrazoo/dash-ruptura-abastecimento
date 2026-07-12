@@ -126,13 +126,13 @@ EXCLUDED_STORE_PREFIXES: list[str] = ["TERRAZOO CD", "LYNKZ BR", "RV PRODUÇÃO"
 EXCLUDED_BRIDGE_UNIDADES: set[str] = {"300", "203"}
 
 
-# Paleta de cores por segmento (ciclo por indice em VALID_SEGMENTOS), no tom
-# verde/tema do dashboard original. Os valores exatos usados no HTML legado
-# (array "GS") nao puderam ser recuperados da analise do arquivo fonte -
-# ajuste livremente para casar com a marca quando o frontend for construido.
+# Paleta de cores por segmento (ciclo por indice em VALID_SEGMENTOS) -
+# array "GS" recuperado literalmente do HTML legado (dash 26.06.html, linha
+# 717). Uma tentativa anterior deste arquivo usava uma paleta placeholder por
+# acreditar que o array original estivesse irrecuperavel; nao estava.
 SEGMENTO_COLOR_PALETTE: list[str] = [
-    "#2d6b4a", "#3a8a5c", "#1a4a32", "#5ed9a0", "#3a7fd5",
-    "#c87010", "#e8a050", "#8a5cf0", "#e05555",
+    "#5ed9a0", "#4cbf8a", "#3ca574", "#2e8b5e", "#7ff5b8",
+    "#9aebb2", "#c4e8ce", "#6bb5ff", "#f4a85d",
 ]
 
 
@@ -179,11 +179,13 @@ def loja_color(percentual: float) -> str:
 
 
 def fornecedor_color(percentual: float) -> str:
+    """Cores identicas as usadas na tabela de fornecedores do HTML legado
+    (dash 26.06.html, linha 2270: `f.p>30?'#ff6b6b':f.p>15?'#ffd166':'#5ed9a0'`)."""
     if percentual > 30:
-        return "#e05555"
+        return "#ff6b6b"
     if percentual > 15:
-        return "#c87010"
-    return "#2d6b4a"
+        return "#ffd166"
+    return "#5ed9a0"
 
 
 def segmento_is_over_meta(segmento: str, percentual: float) -> bool:
