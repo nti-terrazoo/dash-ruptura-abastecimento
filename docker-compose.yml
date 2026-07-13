@@ -7,7 +7,7 @@ services:
     env_file:
       - ./backend/.env
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8005:8000"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
@@ -21,14 +21,10 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        # URL que o NAVEGADOR do usuario usa para falar com a API - precisa
-        # ser um endereco alcancavel de fora do Docker (nao o hostname interno
-        # da rede docker), por isso localhost:8000 (porta publicada acima) e
-        # o default certo para uso local.
-        VITE_API_BASE_URL: http://localhost:8000
+        VITE_API_BASE_URL: https://192.168.1.176:14445
     container_name: ruptura-frontend
     ports:
-      - "5173:80"
+      - "127.0.0.1:5173:80"
     restart: unless-stopped
     depends_on:
       - backend
