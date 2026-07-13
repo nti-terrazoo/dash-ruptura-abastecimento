@@ -4,6 +4,17 @@
 
 ---
 
+- Para rodar de forma local, é necessário criar o arquivo **docker-compose.override.yml** na raiz do projeto:
+
+```
+services:
+  frontend:
+    build:
+      args:
+        VITE_API_BASE_URL: http://localhost:8005
+```
+---
+
 ## 1. Arquitetura e fluxo de uma requisição
 
 ```
