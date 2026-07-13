@@ -41,11 +41,15 @@ export const seriesValueLabelsPlugin: Plugin<"bar" | "line"> = {
 
         ctx.save();
         if (kind === "valor-barra") {
+          // Centraliza o rotulo no MEIO da barra (nao perto do topo) -
+          // getCenterPoint() da o centro geometrico real do retangulo,
+          // considerando onde a barra comeca (base/eixo) e termina (valor).
+          const { x: cx, y: cy } = (element as unknown as { getCenterPoint: () => { x: number; y: number } }).getCenterPoint();
           ctx.font = "bold 12px 'DM Mono',monospace";
           ctx.fillStyle = String(dataset.label).includes("c/ CD") ? "#ffffff" : "#3a4a3e";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          ctx.translate(x, y - 10);
+          ctx.translate(cx, cy);
           ctx.rotate(-Math.PI / 2);
           ctx.fillText(formatCurrency(value), 0, 0);
         } else if (kind === "percentual-linha") {
