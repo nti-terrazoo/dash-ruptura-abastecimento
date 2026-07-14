@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useOverview, useOverviewSeries } from "../api/queries";
+import { useOverview, useOverviewItemCritico, useOverviewSeries } from "../api/queries";
 import { Card } from "../components/common/Card";
 import { ChartContainer } from "../components/common/ChartContainer";
 import { ErrorState } from "../components/common/ErrorState";
@@ -10,6 +10,7 @@ import { SeriesChart } from "../components/charts/SeriesChart";
 import { formatCurrency, formatDateFull, formatDateShort, formatDde, formatPercent } from "../lib/format";
 import { segmentColor } from "../lib/segmentos";
 import { useSelectedDate } from "../hooks/useSelectedDate";
+import { usePrefetchSecondaryPages } from "../hooks/usePrefetchSecondaryPages";
 import styles from "./OverviewPage.module.css";
 
 const DAYS_OPTIONS = [15, 30, 60] as const;
@@ -17,6 +18,8 @@ const DAYS_OPTIONS = [15, 30, 60] as const;
 export function OverviewPage() {
   const { selectedDate } = useSelectedDate();
   const overviewQuery = useOverview(selectedDate);
+  const itemCriticoQuery = useOverviewItemCritico(selectedDate);
+  usePrefetchSecondaryPages(selectedDate);
   const [days, setDays] = useState<(typeof DAYS_OPTIONS)[number]>(15);
   const [showSemCd, setShowSemCd] = useState(true);
   const [showComCd, setShowComCd] = useState(false);
@@ -41,7 +44,8 @@ export function OverviewPage() {
       ? `${formatDateShort(activeSeries[0].data)}–${formatDateShort(activeSeries[activeSeries.length - 1].data)}`
       : null;
 
-  const criticoSegCor = data?.item_critico?.segmento ? segmentColor(data.item_critico.segmento) : undefined;
+  const itemCritico = itemCriticoQuery.data?.item_critico;
+  const criticoSegCor = itemCritico?.segmento ? segmentColor(itemCritico.segmento) : undefined;
 
   return (
     <div>
@@ -164,36 +168,40 @@ export function OverviewPage() {
           <div className={styles.criticoHeader}>
             <span className={styles.criticoDot} />
             <span className={styles.criticoTitle}>Item Mais Crítico</span>
-            <span className={styles.criticoDate}>{data ? formatDateFull(data.data_referencia) : "—"}</span>
+            <span className={styles.criticoDate}>
+              {itemCriticoQuery.data ? formatDateFull(itemCriticoQuery.data.data_referencia) : "—"}
+            </span>
           </div>
-          {!data ? (
+          {itemCriticoQuery.isError ? (
+            <div style={{ fontSize: 11, color: "var(--red)" }}>Não foi possível carregar o item crítico.</div>
+          ) : itemCriticoQuery.isLoading ? (
             <Skeleton height={140} />
-          ) : !data.item_critico ? (
+          ) : !itemCritico ? (
             <div style={{ fontSize: 11, color: "var(--muted)" }}>Nenhum item crítico encontrado.</div>
           ) : (
             <div className={styles.criticoBody}>
               <div>
                 <div className={styles.criticoFieldLabel}>Produto</div>
-                <div className={styles.criticoProduto}>{data.item_critico.produto ?? "—"}</div>
+                <div className={styles.criticoProduto}>{itemCritico.produto ?? "—"}</div>
               </div>
               <div className={styles.criticoRow}>
                 <div>
                   <div className={styles.criticoFieldLabel}>Loja</div>
-                  <div className={styles.criticoLoja}>{data.item_critico.loja ?? "—"}</div>
+                  <div className={styles.criticoLoja}>{itemCritico.loja ?? "—"}</div>
                 </div>
                 <div>
                   <div className={styles.criticoFieldLabel}>Seg.</div>
                   <div className={styles.criticoSeg} style={{ color: criticoSegCor ?? "var(--g1)" }}>
-                    {data.item_critico.segmento?.replace("PET ", "") ?? "—"}
+                    {itemCritico.segmento?.replace("PET ", "") ?? "—"}
                   </div>
                 </div>
               </div>
               <div>
                 <div className={styles.criticoFieldLabel}>Valor Ruptura</div>
-                <div className={styles.criticoValor}>{formatCurrency(data.item_critico.valor)}</div>
+                <div className={styles.criticoValor}>{formatCurrency(itemCritico.valor)}</div>
               </div>
-              {(data.item_critico.status_label ?? data.item_critico.situacao) && (
-                <div className={styles.criticoStatus}>{data.item_critico.status_label ?? data.item_critico.situacao}</div>
+              {(itemCritico.status_label ?? itemCritico.situacao) && (
+                <div className={styles.criticoStatus}>{itemCritico.status_label ?? itemCritico.situacao}</div>
               )}
             </div>
           )}

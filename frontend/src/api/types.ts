@@ -60,6 +60,10 @@ export interface OverviewResponse {
   top_fornecedores_dde: TopFornecedorDde[];
   top_segmentos: TopSegmentoPercentual[];
   ruptura_por_segmento: SegmentoRuptura[];
+}
+
+export interface OverviewItemCriticoResponse {
+  data_referencia: IsoDate;
   item_critico: ItemBridge | null;
 }
 

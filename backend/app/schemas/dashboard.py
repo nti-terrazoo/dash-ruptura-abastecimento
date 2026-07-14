@@ -62,6 +62,10 @@ class OverviewResponse(BaseModel):
     top_fornecedores_dde: list[TopFornecedorDde]
     top_segmentos: list[TopSegmentoPercentual]
     ruptura_por_segmento: list[SegmentoRuptura]
+
+
+class OverviewItemCriticoResponse(BaseModel):
+    data_referencia: datetime.date
     item_critico: ItemBridge | None
 
 

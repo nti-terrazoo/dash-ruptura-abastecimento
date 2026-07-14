@@ -3,7 +3,7 @@ import datetime
 from fastapi import APIRouter, Depends, Query
 
 from app.routers.common import get_days_window, get_reference_date
-from app.schemas.dashboard import OverviewResponse, SeriesResponse
+from app.schemas.dashboard import OverviewItemCriticoResponse, OverviewResponse, SeriesResponse
 from app.services import dashboard_service
 
 router = APIRouter(tags=["overview"])
@@ -12,6 +12,11 @@ router = APIRouter(tags=["overview"])
 @router.get("/overview", response_model=OverviewResponse)
 def overview(data_referencia: datetime.date = Depends(get_reference_date)):
     return dashboard_service.get_overview(data_referencia)
+
+
+@router.get("/overview/item-critico", response_model=OverviewItemCriticoResponse)
+def overview_item_critico(data_referencia: datetime.date = Depends(get_reference_date)):
+    return dashboard_service.get_overview_item_critico(data_referencia)
 
 
 @router.get("/overview/series", response_model=SeriesResponse)

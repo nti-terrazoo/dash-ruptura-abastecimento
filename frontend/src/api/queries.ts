@@ -9,6 +9,7 @@ import type {
   HealthResponse,
   LojaDetailResponse,
   LojasResponse,
+  OverviewItemCriticoResponse,
   OverviewResponse,
   SegmentoDetailResponse,
   SegmentoSeriesResponse,
@@ -29,6 +30,7 @@ export const queryKeys = {
   health: ["health"] as const,
   dates: ["dates"] as const,
   overview: (date?: string) => ["overview", date] as const,
+  overviewItemCritico: (date?: string) => ["overview-item-critico", date] as const,
   overviewSeries: (date: string | undefined, days: number, comCd: boolean) =>
     ["overview-series", date, days, comCd] as const,
   lojas: (date?: string) => ["lojas", date] as const,
@@ -72,6 +74,19 @@ export function useOverview(date?: string) {
   });
 }
 
+/** Separado de useOverview() de proposito: o item critico exige varrer a
+ * bridge inteira no backend (a consulta mais lenta da Visao Geral), entao
+ * fica numa query propria para nao segurar o resto dos KPIs - cada card
+ * aparece assim que os dados dele chegam, em vez de tudo esperar a parte
+ * mais lenta. */
+export function useOverviewItemCritico(date?: string) {
+  return useQuery({
+    queryKey: queryKeys.overviewItemCritico(date),
+    queryFn: () => apiGet<OverviewItemCriticoResponse>("/api/overview/item-critico", { date }),
+    ...defaultQueryOptions,
+  });
+}
+
 export function useOverviewSeries(date: string | undefined, days: 15 | 30 | 60, comCd: boolean, enabled = true) {
   return useQuery({
     queryKey: queryKeys.overviewSeries(date, days, comCd),
@@ -106,12 +121,21 @@ export function useFornecedores(date: string | undefined, segmento: string) {
   });
 }
 
-export function useBridge(date: string | undefined, mode: BridgeMode, chave?: string | null) {
-  return useQuery({
+/** Extraida para fora do hook para que o prefetch em segundo plano
+ * (usePrefetchSecondaryPages) monte exatamente a mesma queryKey/queryFn -
+ * garante que o cache batha quando o usuario navega ate a aba de verdade. */
+export function bridgeQueryOptions(date: string | undefined, mode: BridgeMode, chave?: string | null) {
+  return {
     queryKey: queryKeys.bridge(date, mode, chave),
     queryFn: () => apiGet<BridgeResponse>("/api/bridge", { date, mode, chave: chave ?? undefined }),
-    enabled: mode === "geral" || Boolean(chave),
     ...defaultQueryOptions,
+  };
+}
+
+export function useBridge(date: string | undefined, mode: BridgeMode, chave?: string | null) {
+  return useQuery({
+    ...bridgeQueryOptions(date, mode, chave),
+    enabled: mode === "geral" || Boolean(chave),
   });
 }
 
@@ -135,13 +159,37 @@ export function useBridgeDrilldown(
   });
 }
 
+export function segmentoDetailQueryOptions(date: string | undefined, segmento: string) {
+  return {
+    queryKey: queryKeys.segmentoDetail(date, segmento),
+    queryFn: () => apiGet<SegmentoDetailResponse>(`/api/segmentos/${encodeURIComponent(segmento)}`, { date }),
+    ...defaultQueryOptions,
+  };
+}
+
 export function useSegmentoDetail(date: string | undefined, segmento: string | null) {
   return useQuery({
-    queryKey: queryKeys.segmentoDetail(date, segmento ?? ""),
-    queryFn: () => apiGet<SegmentoDetailResponse>(`/api/segmentos/${encodeURIComponent(segmento!)}`, { date }),
+    ...segmentoDetailQueryOptions(date, segmento ?? ""),
     enabled: Boolean(segmento),
-    ...defaultQueryOptions,
   });
+}
+
+export function segmentoSeriesQueryOptions(
+  date: string | undefined,
+  segmento: string,
+  days: 0 | 30 | 60,
+  comCd: boolean,
+) {
+  return {
+    queryKey: queryKeys.segmentoSeries(date, segmento, days, comCd),
+    queryFn: () =>
+      apiGet<SegmentoSeriesResponse>(`/api/segmentos/${encodeURIComponent(segmento)}/series`, {
+        date,
+        days,
+        cd: comCd,
+      }),
+    ...defaultQueryOptions,
+  };
 }
 
 export function useSegmentoSeries(
@@ -152,14 +200,7 @@ export function useSegmentoSeries(
   enabled = true,
 ) {
   return useQuery({
-    queryKey: queryKeys.segmentoSeries(date, segmento ?? "", days, comCd),
-    queryFn: () =>
-      apiGet<SegmentoSeriesResponse>(`/api/segmentos/${encodeURIComponent(segmento!)}/series`, {
-        date,
-        days,
-        cd: comCd,
-      }),
+    ...segmentoSeriesQueryOptions(date, segmento ?? "", days, comCd),
     enabled: Boolean(segmento) && enabled,
-    ...defaultQueryOptions,
   });
 }

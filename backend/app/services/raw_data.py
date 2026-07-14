@@ -23,11 +23,24 @@ def _rows_as_dicts(cursor) -> list[dict]:
     return rows
 
 
+
+# Default do driver e arraysize=100/prefetchrows=2 - para views com muitas
+# linhas (ex. VW_DASH_LOJAS_BRIDGE, uma linha por item/loja) isso significa
+# dezenas ou centenas de round-trips ao Oracle so para buscar um resultado
+# que caberia em poucos. Aumentar os dois reduz drasticamente o numero de
+# round-trips numa rede com latencia (o cenario deste projeto, Oracle
+# legado acessado remotamente) - e o principal motivo do primeiro
+# carregamento do dia ser lento.
+_FETCH_ARRAYSIZE = 5000
+
+
 def _run(sql_template: str, params: dict) -> list[dict]:
     schema = get_settings().oracle_schema
     sql = sql_template.format(schema=schema)
     with get_connection() as conn:
         cursor = conn.cursor()
+        cursor.arraysize = _FETCH_ARRAYSIZE
+        cursor.prefetchrows = _FETCH_ARRAYSIZE
         cursor.execute(sql, params)
         return _rows_as_dicts(cursor)
 
@@ -79,6 +92,11 @@ def get_fornecedores(data_referencia: datetime.date) -> list[dict]:
 
 def get_lojas_bridge(data_referencia: datetime.date) -> list[dict]:
     return _fetch_for_date("lojas_bridge", queries.LOJAS_BRIDGE, data_referencia)
+
+
+def get_lojas_bridge_top_critico(data_referencia: datetime.date) -> list[dict]:
+    """No maximo 1 linha - ver comentario de LOJAS_BRIDGE_TOP_CRITICO."""
+    return _fetch_for_date("lojas_bridge_top_critico", queries.LOJAS_BRIDGE_TOP_CRITICO, data_referencia)
 
 
 def get_dde_geral(data_referencia: datetime.date) -> list[dict]:

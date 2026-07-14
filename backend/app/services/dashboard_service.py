@@ -4,6 +4,7 @@ processData() do HTML legado, agora rodando no servidor (uma vez, cacheado)
 em vez de no browser a cada troca de filtro.
 """
 
+import concurrent.futures
 import datetime
 
 from app.core.business_rules import (
@@ -105,10 +106,24 @@ def get_segmentos_today(data_referencia: datetime.date) -> dict[str, dict]:
 
 
 def get_overview(data_referencia: datetime.date) -> dict:
-    dde_geral_rows = raw_data.get_dde_geral(data_referencia)
-    dde_forn_rows = raw_data.get_dde_fornecedor(data_referencia)
-    seg_today = get_segmentos_today(data_referencia)
-    bridge_rows = raw_data.get_lojas_bridge(data_referencia)
+    """KPIs da Visao Geral, exceto o item critico (ver get_overview_item_critico) -
+    isolado numa consulta separada porque exige varrer a bridge inteira
+    (a maior view) e e a parte mais lenta do dashboard. As demais consultas
+    sao independentes entre si e rodam em paralelo (conexoes distintas do
+    pool Oracle) em vez de sequencialmente, para reduzir a latencia do
+    primeiro carregamento do dia (cache frio)."""
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        future_dde_geral = executor.submit(raw_data.get_dde_geral, data_referencia)
+        future_dde_forn = executor.submit(raw_data.get_dde_fornecedor, data_referencia)
+        future_seg_today = executor.submit(get_segmentos_today, data_referencia)
+        future_dia = executor.submit(raw_data.get_dia_a_dia, data_referencia)
+        future_dia_cd = executor.submit(raw_data.get_dia_a_dia_cd, data_referencia)
+
+        dde_geral_rows = future_dde_geral.result()
+        dde_forn_rows = future_dde_forn.result()
+        seg_today = future_seg_today.result()
+        dia_rows = future_dia.result()
+        dia_cd_rows = future_dia_cd.result()
 
     top_fornecedores_dde = sorted(
         (
@@ -145,14 +160,25 @@ def get_overview(data_referencia: datetime.date) -> dict:
     return {
         "data_referencia": data_referencia,
         "meta_percentual": 10,
-        "ruptura_sem_cd": _kpi_from_rows(raw_data.get_dia_a_dia(data_referencia)),
-        "ruptura_com_cd": _kpi_from_rows(raw_data.get_dia_a_dia_cd(data_referencia)),
+        "ruptura_sem_cd": _kpi_from_rows(dia_rows),
+        "ruptura_com_cd": _kpi_from_rows(dia_cd_rows),
         "dde_geral": dde_geral_rows[0]["dias_estoque"] if dde_geral_rows else None,
         "top_fornecedores_dde": top_fornecedores_dde,
         "top_segmentos": top_segmentos,
         "ruptura_por_segmento": ruptura_por_segmento,
-        "item_critico": _pick_item_critico(bridge_rows),
     }
+
+
+def get_overview_item_critico(data_referencia: datetime.date) -> dict:
+    """Isolado de get_overview: usa uma query dedicada que ja pede pro Oracle
+    ordenar e devolver so a linha de maior valor (ver
+    queries.LOJAS_BRIDGE_TOP_CRITICO), em vez de trazer a bridge inteira e
+    achar o maximo em Python - a mesma logica de exclusao (valor>0, lojas nao
+    monitoradas) so que resolvida no banco, que e muito mais rapido para uma
+    view desse tamanho."""
+    rows = raw_data.get_lojas_bridge_top_critico(data_referencia)
+    item_critico = _map_bridge_item(rows[0]) if rows else None
+    return {"data_referencia": data_referencia, "item_critico": item_critico}
 
 
 def get_series(data_referencia: datetime.date, dias: int = 15, com_cd: bool = False) -> dict:
