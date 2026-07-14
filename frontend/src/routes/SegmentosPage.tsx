@@ -42,7 +42,7 @@ export function SegmentosPage() {
   const { selectedDate } = useSelectedDate();
   const [days, setDays] = useState<(typeof DAYS_OPTIONS)[number]["value"]>(0);
   const [showSemCd, setShowSemCd] = useState(true);
-  const [showComCd, setShowComCd] = useState(false);
+  const [showComCd, setShowComCd] = useState(true);
 
   const detailQuery = useSegmentoDetail(selectedDate, segmento);
   const semCdSeries = useSegmentoSeries(selectedDate, segmento, days, false, showSemCd);

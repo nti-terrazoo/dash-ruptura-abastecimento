@@ -16,6 +16,10 @@ import { SEGMENTOS } from "../lib/segmentos";
  * get_overview_item_critico no backend), entao aquecer o cache dela
  * enquanto o usuario ainda esta lendo a Visao Geral e o que mais reduz a
  * espera percebida ao trocar de aba.
+ *
+ * A serie do segmento e prefetchada nas duas variantes (s/CD e c/CD) porque
+ * SegmentosPage mostra as duas ligadas por padrao - o warm-up diario
+ * (app/jobs/cache_warmup.py no backend) cobre as demais janelas/segmentos.
  */
 export function usePrefetchSecondaryPages(selectedDate: string | undefined) {
   const queryClient = useQueryClient();
@@ -27,5 +31,6 @@ export function usePrefetchSecondaryPages(selectedDate: string | undefined) {
     void queryClient.prefetchQuery(bridgeQueryOptions(selectedDate, "geral"));
     void queryClient.prefetchQuery(segmentoDetailQueryOptions(selectedDate, defaultSegmento));
     void queryClient.prefetchQuery(segmentoSeriesQueryOptions(selectedDate, defaultSegmento, 0, false));
+    void queryClient.prefetchQuery(segmentoSeriesQueryOptions(selectedDate, defaultSegmento, 0, true));
   }, [selectedDate, queryClient]);
 }

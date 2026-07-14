@@ -12,11 +12,16 @@ fora do ar por um instante) nao abortar o resto do warm-up.
 import logging
 
 from app.core.business_rules import VALID_SEGMENTOS
+from app.routers.common import SEGMENTO_DAYS_WINDOWS, VALID_DAYS_WINDOWS
 from app.services import dashboard_service, raw_data
 
 logger = logging.getLogger("app.jobs.cache_warmup")
 
-SERIES_DAYS_WINDOWS = (15, 30, 60)
+# Mesmas janelas que os FilterPill de dias oferecem no frontend (Overview:
+# 15/30/60; Ruptura Segmentos: Mes/30/60) - ver VALID_DAYS_WINDOWS/
+# SEGMENTO_DAYS_WINDOWS em app/routers/common.py, reaproveitados aqui para
+# nao duplicar a lista em dois lugares.
+COM_CD_VARIANTS = (False, True)
 
 
 def _run_step(description: str, fn, *args, **kwargs) -> None:
@@ -41,9 +46,15 @@ def warm_cache() -> None:
 
     _run_step("overview", dashboard_service.get_overview, data_referencia)
     _run_step("overview item critico", dashboard_service.get_overview_item_critico, data_referencia)
-    for dias in SERIES_DAYS_WINDOWS:
-        _run_step(f"overview series {dias}d s/CD", dashboard_service.get_series, data_referencia, dias=dias, com_cd=False)
-        _run_step(f"overview series {dias}d c/CD", dashboard_service.get_series, data_referencia, dias=dias, com_cd=True)
+    for dias in VALID_DAYS_WINDOWS:
+        for com_cd in COM_CD_VARIANTS:
+            _run_step(
+                f"overview series {dias}d {'c/CD' if com_cd else 's/CD'}",
+                dashboard_service.get_series,
+                data_referencia,
+                dias=dias,
+                com_cd=com_cd,
+            )
 
     _run_step("lojas", dashboard_service.get_lojas, data_referencia)
     _run_step("fornecedores", dashboard_service.get_fornecedores, data_referencia, segmento="TODOS")
@@ -56,13 +67,15 @@ def warm_cache() -> None:
 
     for segmento in VALID_SEGMENTOS:
         _run_step(f"segmento detail {segmento}", dashboard_service.get_segmento_detail, data_referencia, segmento)
-        _run_step(
-            f"segmento series {segmento}",
-            dashboard_service.get_segmento_series,
-            segmento,
-            data_referencia,
-            dias=0,
-            com_cd=False,
-        )
+        for dias in SEGMENTO_DAYS_WINDOWS:
+            for com_cd in COM_CD_VARIANTS:
+                _run_step(
+                    f"segmento series {segmento} {dias}d {'c/CD' if com_cd else 's/CD'}",
+                    dashboard_service.get_segmento_series,
+                    segmento,
+                    data_referencia,
+                    dias=dias,
+                    com_cd=com_cd,
+                )
 
     logger.info("Warm-up de cache concluido para %s", data_referencia)

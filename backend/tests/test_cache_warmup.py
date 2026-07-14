@@ -34,9 +34,21 @@ def test_warm_cache_calls_every_view_for_the_latest_date():
         (60, True),
     }
 
-    # Um detalhe e uma serie por segmento valido (9 segmentos hoje).
+    # Um detalhe por segmento (9 segmentos hoje) e uma serie por segmento
+    # para cada combinacao de janela (Mes/30/60) x CD (s/c) - 9 * 3 * 2 = 54.
     assert mocked_service.get_segmento_detail.call_count == 9
-    assert mocked_service.get_segmento_series.call_count == 9
+
+    segmento_series_calls = mocked_service.get_segmento_series.call_args_list
+    assert len(segmento_series_calls) == 54
+    windows_seen = {(c.kwargs["dias"], c.kwargs["com_cd"]) for c in segmento_series_calls}
+    assert windows_seen == {
+        (0, False),
+        (0, True),
+        (30, False),
+        (30, True),
+        (60, False),
+        (60, True),
+    }
 
 
 def test_warm_cache_continues_after_a_step_fails():

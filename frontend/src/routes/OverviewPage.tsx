@@ -22,7 +22,7 @@ export function OverviewPage() {
   usePrefetchSecondaryPages(selectedDate);
   const [days, setDays] = useState<(typeof DAYS_OPTIONS)[number]>(15);
   const [showSemCd, setShowSemCd] = useState(true);
-  const [showComCd, setShowComCd] = useState(false);
+  const [showComCd, setShowComCd] = useState(true);
 
   const semCdSeries = useOverviewSeries(selectedDate, days, false, showSemCd);
   const comCdSeries = useOverviewSeries(selectedDate, days, true, showComCd);
