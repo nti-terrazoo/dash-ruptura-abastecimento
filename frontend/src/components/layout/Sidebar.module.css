@@ -63,6 +63,12 @@
   margin: 6px 12px;
 }
 
+/* Empurra tudo abaixo dela (controles de data + rodape) para o final da
+   sidebar, preenchendo o espaco sobrando abaixo da navegacao. */
+.dividerBottom {
+  margin-top: auto;
+}
+
 .nav {
   display: flex;
   flex-direction: column;
@@ -131,7 +137,8 @@
   gap: 8px;
 }
 
-.collapsed .controls {
+.collapsed .controls,
+.collapsed .dividerBottom {
   display: none;
 }
 
@@ -195,7 +202,6 @@
 }
 
 .footer {
-  margin-top: auto;
   padding: 10px 12px 16px;
   font-size: 9px;
   color: rgba(255, 255, 255, 0.35);

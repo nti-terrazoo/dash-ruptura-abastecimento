@@ -1,5 +1,5 @@
 import { Suspense, lazy } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AppShell } from "./components/layout/AppShell";
 import { Skeleton } from "./components/common/Skeleton";
 import { SEGMENTOS } from "./lib/segmentos";
@@ -15,6 +15,14 @@ function RouteFallback() {
   return <Skeleton height={400} />;
 }
 
+/** <Navigate to="/segmentos/X" /> com uma string simples NAO preserva o
+ * ?date= atual (o mesmo problema do NavLink na Sidebar) - monta o destino a
+ * partir da location atual para nao perder a data selecionada. */
+function SegmentosIndexRedirect() {
+  const location = useLocation();
+  return <Navigate to={{ pathname: `/segmentos/${SEGMENTOS[0]}`, search: location.search }} replace />;
+}
+
 export function App() {
   return (
     <Suspense fallback={<RouteFallback />}>
@@ -24,7 +32,7 @@ export function App() {
           <Route path="lojas" element={<LojasPage />} />
           <Route path="fornecedores" element={<FornecedoresPage />} />
           <Route path="bridge" element={<BridgePage />} />
-          <Route path="segmentos" element={<Navigate to={`/segmentos/${SEGMENTOS[0]}`} replace />} />
+          <Route path="segmentos" element={<SegmentosIndexRedirect />} />
           <Route path="segmentos/:segmento" element={<SegmentosPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

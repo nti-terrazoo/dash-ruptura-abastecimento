@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import logo from "../../assets/logo.webp";
 import { useSelectedDate } from "../../hooks/useSelectedDate";
@@ -29,6 +29,9 @@ export function Sidebar() {
   const { selectedDate, setSelectedDate, availableDates } = useSelectedDate();
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
+  // Preserva ?date= (e qualquer outro query param) ao trocar de aba - sem
+  // isso, NavLink navega para o path puro e a data selecionada se perde.
+  const location = useLocation();
 
   async function handleRefresh() {
     setRefreshing(true);
@@ -53,7 +56,7 @@ export function Sidebar() {
         {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
-            to={to}
+            to={{ pathname: to, search: location.search }}
             end={end}
             className={({ isActive }) => `${styles.tab} ${isActive ? styles.on : ""}`}
             title={label}
@@ -64,7 +67,7 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className={styles.divider} />
+      <div className={styles.dividerBottom} />
 
       <div className={styles.controls}>
         <select

@@ -1,5 +1,5 @@
 import { Fragment, useState, type CSSProperties } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useSegmentoDetail, useSegmentoSeries } from "../api/queries";
 import type { FornecedorHistorico } from "../api/types";
 import { Card } from "../components/common/Card";
@@ -38,6 +38,7 @@ export function SegmentosPage() {
   // /segmentos redireciona antes de este componente ser montado.
   const { segmento = SEGMENTOS[0] } = useParams<{ segmento: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { selectedDate } = useSelectedDate();
   const [days, setDays] = useState<(typeof DAYS_OPTIONS)[number]["value"]>(0);
   const [showSemCd, setShowSemCd] = useState(true);
@@ -130,7 +131,12 @@ export function SegmentosPage() {
         <div className={styles.headerRight}>
           <div className={styles.pillsRow}>
             {SEGMENTOS.map((s) => (
-              <FilterPill key={s} active={segmento === s} onClick={() => navigate(`/segmentos/${s}`)} onDark>
+              <FilterPill
+                key={s}
+                active={segmento === s}
+                onClick={() => navigate({ pathname: `/segmentos/${s}`, search: location.search })}
+                onDark
+              >
                 {s}
               </FilterPill>
             ))}
