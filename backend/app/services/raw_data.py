@@ -5,7 +5,7 @@ de agregacao (dashboard_service.py) consumirem sem precisar conhecer SQL.
 
 import datetime
 
-from app.cache import cached
+from app.cache import cached, cached_dates
 from app.config import get_settings
 from app.db import queries
 from app.db.oracle import get_connection
@@ -120,7 +120,7 @@ def get_available_dates(limit: int = 15) -> list[datetime.date]:
         rows = _run(queries.AVAILABLE_DATES, {"limit": limit})
         return [row["data_referencia"] for row in rows]
 
-    return cached(("available_dates", str(limit)), loader)
+    return cached_dates(("available_dates", str(limit)), loader)
 
 
 def get_dia_a_dia_range(data_inicio: datetime.date, data_fim: datetime.date) -> list[dict]:

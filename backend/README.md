@@ -90,6 +90,7 @@ disponivel):
 | `GET /api/bridge?mode=geral\|segmento\|loja&chave=...` | Waterfall de status da bridge |
 | `GET /api/bridge/drilldown?mode=...&chave=...&status_label=...` | Itens de um status da bridge |
 | `GET /api/segmentos/{segmento}` | Aba "Ruptura Segmentos" completa |
+| `POST /api/admin/warm-cache` | Dispara manualmente o warm-up diario do cache (ver secao 6) |
 
 ## 5. Notas sobre fidelidade as regras de negocio
 
@@ -112,6 +113,25 @@ disponivel):
 
 - Pool de conexoes Oracle criado uma vez no startup (`app/db/oracle.py`) -
   evita o custo de abrir sessao a cada request.
-- Cache em memoria por `(view, data_referencia)` com TTL configuravel
-  (`CACHE_TTL_SECONDS` no `.env`, default 30 min) - a segunda consulta para a
-  mesma data e instantanea, sem round-trip ao Oracle.
+- Cache em memoria por `(view, data_referencia)`, com deduplicacao: se duas
+  requisicoes concorrentes pedem a mesma chave e nenhuma esta em cache ainda,
+  a segunda espera a primeira em vez de repetir a consulta (`app/cache.py`).
+- **TTL de 24h para dados de uma data especifica** (`CACHE_TTL_SECONDS`,
+  default 86400). Isso e seguro porque o ETL do Oracle escreve os dados de
+  cada `DATA_REFERENCIA` uma unica vez - uma vez calculado, o resultado de um
+  dia especifico nao muda mais. A lista de "datas disponiveis" usa um TTL
+  curto e separado (`DATES_CACHE_TTL_SECONDS`, default 10 min) para o backend
+  perceber rapido quando o ETL publica um novo dia.
+- **Warm-up diario agendado** (`app/jobs/cache_warmup.py`, via APScheduler)
+  roda todo dia as `CACHE_WARMUP_HOUR:CACHE_WARMUP_MINUTE` (default 01:00 -
+  ajuste para logo depois do horario do ETL noturno do Oracle) e pre-carrega
+  o cache com a visao padrao de cada aba (Visao Geral, Lojas, Fornecedores,
+  Bridge geral, Ruptura Segmentos para os 9 segmentos) para a data mais
+  recente. Sem isso, a primeira pessoa a abrir o dashboard de manha pagaria
+  o custo da consulta mais lenta do sistema (a bridge geral, que varre a
+  `VW_DASH_LOJAS_BRIDGE` inteira e pode levar dezenas de segundos com cache
+  frio). Pode ser disparado manualmente (ex: logo apos um deploy) com:
+  ```bash
+  curl -X POST http://localhost:8000/api/admin/warm-cache
+  ```
+  (a resposta so volta quando o warm-up termina, entao pode levar um tempo).

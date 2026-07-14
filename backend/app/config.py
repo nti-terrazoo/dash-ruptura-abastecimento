@@ -15,7 +15,21 @@ class Settings(BaseSettings):
     oracle_pool_increment: int = 1
     oracle_schema: str = "EPORTAL"
 
-    cache_ttl_seconds: int = 1800
+    # Os dados de uma DATA_REFERENCIA especifica nao mudam depois de calculados
+    # pelo ETL do Oracle (ver README) - 24h e seguro e evita reconsultar o
+    # Oracle (a bridge geral sozinha pode levar dezenas de segundos) varias
+    # vezes ao longo do mesmo dia.
+    cache_ttl_seconds: int = 86400
+    # A lista de "datas disponiveis" e a excecao: precisa de um TTL curto
+    # para o app perceber rapido quando o ETL publica um novo dia (o
+    # warm-up as 1h tambem forca essa atualizacao, mas isso cobre o caso de
+    # o ETL atrasar ou o warm-up falhar).
+    dates_cache_ttl_seconds: int = 600
+
+    # Horario do job diario que aquece o cache do dia mais recente (ver
+    # app/jobs/cache_warmup.py) - default logo apos o ETL noturno do Oracle.
+    cache_warmup_hour: int = 1
+    cache_warmup_minute: int = 0
 
     cors_origins: str = "http://localhost:5173,http://localhost:3000"
 

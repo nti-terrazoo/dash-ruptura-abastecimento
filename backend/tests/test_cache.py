@@ -1,7 +1,7 @@
 import threading
 import time
 
-from app.cache import cached, clear_cache
+from app.cache import cached, cached_dates, clear_cache
 
 
 def test_cached_dedupes_concurrent_calls_for_same_key():
@@ -58,3 +58,12 @@ def test_cached_reuses_value_within_ttl():
 
     assert first == 1
     assert second == 1
+
+
+def test_cached_dates_is_a_separate_pool_from_cached():
+    """cached_dates() (TTL curto, so para a lista de datas disponiveis) nao
+    deve compartilhar entradas com cached() (TTL longo, dados por data) -
+    mesmo com a mesma chave, cada um deve calcular seu proprio valor."""
+    clear_cache()
+    assert cached(("same-key", "x"), lambda: "from-data-pool") == "from-data-pool"
+    assert cached_dates(("same-key", "x"), lambda: "from-dates-pool") == "from-dates-pool"
