@@ -122,7 +122,7 @@ export function OverviewPage() {
                     style={i > 0 ? { paddingTop: 4, borderTop: "1px solid rgba(255,255,255,.1)" } : undefined}
                   >
                     <span className={styles.segTopName} style={{ fontSize: i === 0 ? 16 : i === 1 ? 13 : 11 }}>
-                      {s.segmento.replace("PET ", "")}
+                      {s.segmento}
                     </span>
                     <span className={styles.segTopPct} style={{ fontSize: i === 0 ? 18 : i === 1 ? 14 : 12 }}>
                       {formatPercent(s.percentual, 1)}

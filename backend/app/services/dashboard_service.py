@@ -79,7 +79,7 @@ def get_segmentos_today(data_referencia: datetime.date) -> dict[str, dict]:
     fontes" do HTML original (SEG_SERIES/SEGS_TODAY)."""
     result: dict[str, dict] = {}
     for row in raw_data.get_planilha_grafico(data_referencia):
-        seg = norm_seg(row.get("segmento"))
+        seg = row.get("segmento")
         if not seg:
             continue
         valor = row.get("ruptura_valor_venda") or 0.0
@@ -92,7 +92,7 @@ def get_segmentos_today(data_referencia: datetime.date) -> dict[str, dict]:
     if missing:
         agg: dict[str, dict] = {}
         for row in raw_data.get_planilha_geral(data_referencia):
-            seg = norm_seg(row.get("segmento"))
+            seg = row.get("segmento")
             if seg not in missing:
                 continue
             valor = row.get("ruptura_valor_venda") or 0.0
