@@ -1,0 +1,265 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(45, 107, 74, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid #c5d9c5;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 760px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  position: sticky;
+  top: 0;
+  background: var(--g1);
+  z-index: 5;
+  border-radius: 16px 16px 0 0;
+}
+
+.headerTitle {
+  font-family: "AllerDisplay", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.closeBtn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.closeBtn:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.body {
+  padding: 16px 18px 20px;
+}
+
+.topRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.kicker {
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--g1);
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.dateTitle {
+  font-family: "AllerDisplay", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.metaPill {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.metaPillOk {
+  background: rgba(45, 107, 74, 0.12);
+  color: var(--g1);
+}
+
+.metaPillCrit {
+  background: rgba(224, 85, 85, 0.14);
+  color: #c03030;
+}
+
+.resumo {
+  background: var(--bg2);
+  border-left: 3px solid var(--red);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.resumoOk {
+  border-left-color: var(--g1);
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 640px) {
+  .kpiGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.kpiCard {
+  background: var(--g1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.kpiLabel {
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 6px;
+}
+
+.kpiValue {
+  font-family: "AllerDisplay", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.twoCol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 640px) {
+  .twoCol {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.panelTitle {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.listRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border2);
+  font-size: 11px;
+}
+
+.listRow:last-child {
+  border-bottom: none;
+}
+
+.listRowName {
+  color: var(--text);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.listRowSub {
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+.listRowValue {
+  font-family: "DM Mono", monospace;
+  color: #c03030;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.emptyState {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 8px 0;
+}
+
+.bestLojaCard {
+  margin-top: 8px;
+  background: rgba(45, 107, 74, 0.08);
+  border: 1px solid rgba(45, 107, 74, 0.2);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 11px;
+  color: var(--g1);
+  font-weight: 600;
+}
+
+.pautaList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pautaItem {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: var(--bg2);
+  border-left: 3px solid var(--pauta-color, var(--g1));
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.pautaIndex {
+  font-family: "DM Mono", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--pauta-color, var(--g1));
+  flex-shrink: 0;
+}
+
+.pautaText {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text);
+}

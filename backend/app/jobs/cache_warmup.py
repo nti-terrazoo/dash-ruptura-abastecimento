@@ -64,6 +64,7 @@ def warm_cache() -> None:
     # cada segmento abaixo reaproveita o mesmo resultado (mesma chave de
     # cache em raw_data.get_lojas_bridge) em vez de repetir a varredura.
     _run_step("bridge geral", dashboard_service.get_bridge, data_referencia, mode="geral")
+    _run_step("briefing", dashboard_service.get_briefing, data_referencia)
 
     for segmento in VALID_SEGMENTOS:
         _run_step(f"segmento detail {segmento}", dashboard_service.get_segmento_detail, data_referencia, segmento)

@@ -200,3 +200,50 @@ export interface SegmentoDetailResponse {
   item_critico: ItemBridge | null;
   top_fornecedores_ultimos_dias: FornecedorHistorico[];
 }
+
+export interface BriefingLoja {
+  nome: string;
+  cod_unidade: string;
+  percentual: number;
+  valor: number;
+}
+
+export interface BriefingItemSemPedido {
+  produto: string | null;
+  loja: string | null;
+  valor: number;
+}
+
+export type BriefingPautaTipo = "sem_pedido" | "loja_critica" | "segmento_meta" | "fornecedor" | "cd_atende";
+
+export interface BriefingPauta {
+  tipo: BriefingPautaTipo;
+  cor: string;
+  valor: number | null;
+  percentual: number | null;
+  meta: number | null;
+  nome: string | null;
+}
+
+export type BriefingTendencia = "alta" | "queda" | "estavel";
+
+export interface BriefingResponse {
+  data_referencia: IsoDate;
+  ruptura_percentual: number;
+  ruptura_valor: number;
+  ruptura_percentual_anterior: number;
+  tendencia: BriefingTendencia;
+  meta_percentual: number;
+  acima_meta_geral: boolean;
+  sem_pedido_valor: number;
+  cd_atende_valor: number;
+  dde_geral: number | null;
+  segmento_critico: string | null;
+  segmento_critico_percentual: number | null;
+  segmento_critico_meta: number | null;
+  segmentos_acima_meta: number;
+  lojas_criticas: BriefingLoja[];
+  melhor_loja: BriefingLoja | null;
+  itens_sem_pedido: BriefingItemSemPedido[];
+  pautas: BriefingPauta[];
+}

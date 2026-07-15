@@ -199,3 +199,46 @@ class SegmentoDetailResponse(BaseModel):
     critico_estimado: CriticoEstimado
     item_critico: ItemBridge | None
     top_fornecedores_ultimos_dias: list[FornecedorHistorico]
+
+
+class BriefingLoja(BaseModel):
+    nome: str
+    cod_unidade: str
+    percentual: float
+    valor: float
+
+
+class BriefingItemSemPedido(BaseModel):
+    produto: str | None
+    loja: str | None
+    valor: float
+
+
+class BriefingPauta(BaseModel):
+    tipo: str
+    cor: str
+    valor: float | None = None
+    percentual: float | None = None
+    meta: float | None = None
+    nome: str | None = None
+
+
+class BriefingResponse(BaseModel):
+    data_referencia: datetime.date
+    ruptura_percentual: float
+    ruptura_valor: float
+    ruptura_percentual_anterior: float
+    tendencia: str
+    meta_percentual: float
+    acima_meta_geral: bool
+    sem_pedido_valor: float
+    cd_atende_valor: float
+    dde_geral: float | None
+    segmento_critico: str | None
+    segmento_critico_percentual: float | None
+    segmento_critico_meta: float | None
+    segmentos_acima_meta: int
+    lojas_criticas: list[BriefingLoja]
+    melhor_loja: BriefingLoja | None
+    itens_sem_pedido: list[BriefingItemSemPedido]
+    pautas: list[BriefingPauta]

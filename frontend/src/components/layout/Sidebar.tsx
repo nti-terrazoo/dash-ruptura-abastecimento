@@ -2,6 +2,7 @@ import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import logo from "../../assets/logo.webp";
+import { BriefingLauncher } from "../briefing/BriefingLauncher";
 import { useSelectedDate } from "../../hooks/useSelectedDate";
 import { useSidebarCollapsed } from "../../hooks/useSidebarCollapsed";
 import { formatDateFull } from "../../lib/format";
@@ -95,6 +96,8 @@ export function Sidebar() {
           <RefreshIcon />
           Atualizar
         </button>
+
+        <BriefingLauncher />
       </div>
 
       <div className={styles.footer}>Criado por Abner Santos</div>

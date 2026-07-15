@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiGet } from "./client";
 import type {
+  BriefingResponse,
   BridgeDrilldownResponse,
   BridgeMode,
   BridgeResponse,
@@ -47,6 +48,7 @@ export const queryKeys = {
   segmentoDetail: (date: string | undefined, segmento: string) => ["segmento-detail", date, segmento] as const,
   segmentoSeries: (date: string | undefined, segmento: string, days: number, comCd: boolean) =>
     ["segmento-series", date, segmento, days, comCd] as const,
+  briefing: (date?: string) => ["briefing", date] as const,
 };
 
 export function useHealth() {
@@ -202,5 +204,17 @@ export function useSegmentoSeries(
   return useQuery({
     ...segmentoSeriesQueryOptions(date, segmento ?? "", days, comCd),
     enabled: Boolean(segmento) && enabled,
+  });
+}
+
+/** So busca depois que a senha do Briefing 9h e validada (`enabled`) - o
+ * backend ja entrega isso pronto do cache aquecido as 1h (ver
+ * app/jobs/cache_warmup.py), entao mesmo assim e instantaneo. */
+export function useBriefing(date: string | undefined, enabled: boolean) {
+  return useQuery({
+    queryKey: queryKeys.briefing(date),
+    queryFn: () => apiGet<BriefingResponse>("/api/briefing", { date }),
+    enabled,
+    ...defaultQueryOptions,
   });
 }

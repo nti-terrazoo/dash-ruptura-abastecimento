@@ -521,3 +521,136 @@ def get_segmento_detail(data_referencia: datetime.date, segmento: str) -> dict:
         "item_critico": _pick_item_critico(bridge_rows_seg),
         "top_fornecedores_ultimos_dias": _top_fornecedores_ultimos_dias(seg, data_referencia, dias=3),
     }
+
+
+# Meta geral de ruptura usada no briefing (igual ao resto do dashboard) e o
+# fallback de meta por segmento quando o segmento nao esta em SEG_METAS -
+# replica `SEG_METAS[x]||10` do HTML legado (dash_2.html, renderBriefing()).
+BRIEFING_META_GERAL = 10.0
+BRIEFING_META_SEGMENTO_FALLBACK = 10.0
+
+# Threshold de variacao dia-a-dia (pontos percentuais) para classificar a
+# tendencia como alta/queda em vez de estavel - igual ao HTML legado.
+BRIEFING_TENDENCIA_THRESHOLD = 0.5
+
+# Loja e considerada critica no briefing acima de 15% (diferente do badge
+# "Crítico" do resto do app, que e >25% - e um limiar proprio do briefing no
+# HTML legado, mantido por fidelidade).
+BRIEFING_LOJA_CRITICA_THRESHOLD = 15.0
+
+
+def _briefing_loja(loja: dict) -> dict:
+    return {
+        "nome": loja["nome"],
+        "cod_unidade": loja["cod_unidade"],
+        "percentual": loja["percentual"],
+        "valor": loja["valor"],
+    }
+
+
+def get_briefing(data_referencia: datetime.date) -> dict:
+    """Dados do "Briefing 9h": um resumo executivo com os principais pontos
+    de atencao do dia, para a reuniao matinal. Reaproveita os mesmos
+    services/regras do resto do dashboard (nao recalcula nada do zero) -
+    ver relatorio de analise do dash_2.html para a origem de cada regra.
+    Numeros crus, sem formatacao - o frontend monta o texto final."""
+    dia_2d = get_series(data_referencia, dias=2, com_cd=False)["pontos"]
+    hoje = dia_2d[-1] if dia_2d else {"valor": 0.0, "percentual": 0.0}
+    ontem = dia_2d[-2] if len(dia_2d) >= 2 else hoje
+
+    delta_pct = hoje["percentual"] - ontem["percentual"]
+    if delta_pct > BRIEFING_TENDENCIA_THRESHOLD:
+        tendencia = "alta"
+    elif delta_pct < -BRIEFING_TENDENCIA_THRESHOLD:
+        tendencia = "queda"
+    else:
+        tendencia = "estavel"
+
+    dde_rows = raw_data.get_dde_geral(data_referencia)
+    dde_geral = dde_rows[0]["dias_estoque"] if dde_rows else None
+
+    seg_today = get_segmentos_today(data_referencia)
+    segmentos_hoje = [{"segmento": seg, **vals} for seg, vals in seg_today.items()]
+    segmento_critico = max(segmentos_hoje, key=lambda s: s["percentual"], default=None)
+    segmentos_acima_meta = sum(
+        1 for s in segmentos_hoje if s["percentual"] > SEG_METAS.get(s["segmento"], BRIEFING_META_SEGMENTO_FALLBACK)
+    )
+    segmento_critico_meta = (
+        SEG_METAS.get(segmento_critico["segmento"], BRIEFING_META_SEGMENTO_FALLBACK) if segmento_critico else None
+    )
+
+    bridge = get_bridge(data_referencia, mode="geral")
+    sem_pedido = next((s for s in bridge["statuses"] if s["label"] == "Sit. Crítica s/ Pedido"), None)
+    cd_atende = next((s for s in bridge["statuses"] if s["label"] == "CD Atende Loja"), None)
+
+    lojas = get_lojas(data_referencia)["lojas"]
+    lojas_criticas = sorted(
+        (l for l in lojas if l["percentual"] > BRIEFING_LOJA_CRITICA_THRESHOLD),
+        key=lambda l: l["percentual"],
+        reverse=True,
+    )[:3]
+    candidatos_melhor = sorted((l for l in lojas if l["percentual"] <= BRIEFING_META_GERAL), key=lambda l: l["percentual"])
+    melhor_loja = candidatos_melhor[0] if candidatos_melhor else None
+    # A "loja mais critica" do resumo e a de maior VALOR em ruptura (nao
+    # necessariamente maior %) - mesma semantica de D.LOJAS[0] no legado.
+    pior_loja = max(lojas, key=lambda l: l["valor"], default=None)
+
+    ranking_fornecedores = get_fornecedores(data_referencia, segmento="TODOS")["ranking"]
+    top_fornecedor = max(ranking_fornecedores, key=lambda f: f["valor"], default=None)
+
+    bridge_rows = _valid_bridge_rows(raw_data.get_lojas_bridge(data_referencia))
+    itens_sem_pedido = sorted(
+        (r for r in bridge_rows if (match_bridge_status(r.get("situacao")) or {}).get("label") == "Sit. Crítica s/ Pedido"),
+        key=lambda r: r.get("ruptura_valor_venda") or 0.0,
+        reverse=True,
+    )[:3]
+
+    pautas = []
+    if sem_pedido and sem_pedido["valor"] > 0:
+        pautas.append({"tipo": "sem_pedido", "cor": "#c0392b", "valor": sem_pedido["valor"]})
+    if pior_loja and pior_loja["percentual"] > BRIEFING_LOJA_CRITICA_THRESHOLD:
+        pautas.append(
+            {"tipo": "loja_critica", "cor": "#c0392b", "nome": pior_loja["nome"], "percentual": pior_loja["percentual"]}
+        )
+    if segmento_critico and segmento_critico["percentual"] > segmento_critico_meta:
+        pautas.append(
+            {
+                "tipo": "segmento_meta",
+                "cor": "#b8860b",
+                "nome": segmento_critico["segmento"],
+                "percentual": segmento_critico["percentual"],
+                "meta": segmento_critico_meta,
+            }
+        )
+    if top_fornecedor and top_fornecedor["valor"] > 0:
+        pautas.append({"tipo": "fornecedor", "cor": "#b8860b", "nome": top_fornecedor["fornecedor"], "valor": top_fornecedor["valor"]})
+    if cd_atende and cd_atende["valor"] > 0:
+        pautas.append({"tipo": "cd_atende", "cor": "#1f8a4c", "valor": cd_atende["valor"]})
+
+    return {
+        "data_referencia": data_referencia,
+        "ruptura_percentual": hoje["percentual"],
+        "ruptura_valor": hoje["valor"],
+        "ruptura_percentual_anterior": ontem["percentual"],
+        "tendencia": tendencia,
+        "meta_percentual": BRIEFING_META_GERAL,
+        "acima_meta_geral": hoje["percentual"] > BRIEFING_META_GERAL,
+        "sem_pedido_valor": sem_pedido["valor"] if sem_pedido else 0.0,
+        "cd_atende_valor": cd_atende["valor"] if cd_atende else 0.0,
+        "dde_geral": dde_geral,
+        "segmento_critico": segmento_critico["segmento"] if segmento_critico else None,
+        "segmento_critico_percentual": segmento_critico["percentual"] if segmento_critico else None,
+        "segmento_critico_meta": segmento_critico_meta,
+        "segmentos_acima_meta": segmentos_acima_meta,
+        "lojas_criticas": [_briefing_loja(l) for l in lojas_criticas],
+        "melhor_loja": _briefing_loja(melhor_loja) if melhor_loja else None,
+        "itens_sem_pedido": [
+            {
+                "produto": r.get("descricao_produto"),
+                "loja": r.get("nome_fantasia_loja"),
+                "valor": r.get("ruptura_valor_venda") or 0.0,
+            }
+            for r in itens_sem_pedido
+        ],
+        "pautas": pautas,
+    }
