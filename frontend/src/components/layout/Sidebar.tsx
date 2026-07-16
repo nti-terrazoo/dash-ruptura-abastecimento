@@ -3,6 +3,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import logo from "../../assets/logo.webp";
 import { BriefingLauncher } from "../briefing/BriefingLauncher";
+import { ComiteLauncher } from "../comite/ComiteLauncher";
 import { useSelectedDate } from "../../hooks/useSelectedDate";
 import { useSidebarCollapsed } from "../../hooks/useSidebarCollapsed";
 import { formatDateFull } from "../../lib/format";
@@ -66,6 +67,7 @@ export function Sidebar() {
             <span className={styles.tabLabel}>{label}</span>
           </NavLink>
         ))}
+        <ComiteLauncher />
       </nav>
 
       <div className={styles.dividerBottom} />

@@ -24,6 +24,7 @@ def test_warm_cache_calls_every_view_for_the_latest_date():
     mocked_service.get_fornecedores.assert_called_once_with(latest, segmento="TODOS")
     mocked_service.get_bridge.assert_called_once_with(latest, mode="geral")
     mocked_service.get_briefing.assert_called_once_with(latest)
+    mocked_service.get_comite.assert_called_once_with(latest)
 
     series_calls = mocked_service.get_series.call_args_list
     assert {(c.kwargs["dias"], c.kwargs["com_cd"]) for c in series_calls} == {

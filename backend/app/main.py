@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 from app.config import get_settings
 from app.db.oracle import OracleUnavailableError, close_pool, init_pool
 from app.jobs.cache_warmup import warm_cache
-from app.routers import admin, briefing, bridge, dates, fornecedores, health, lojas, overview, segmentos
+from app.routers import admin, briefing, bridge, comite, dates, fornecedores, health, lojas, overview, segmentos
 
 logging.basicConfig(level=logging.INFO)
 
@@ -71,3 +71,4 @@ app.include_router(fornecedores.router, prefix="/api")
 app.include_router(bridge.router, prefix="/api")
 app.include_router(segmentos.router, prefix="/api")
 app.include_router(briefing.router, prefix="/api")
+app.include_router(comite.router, prefix="/api")

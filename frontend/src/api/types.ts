@@ -201,6 +201,59 @@ export interface SegmentoDetailResponse {
   top_fornecedores_ultimos_dias: FornecedorHistorico[];
 }
 
+export interface ComiteSegmento {
+  segmento: string;
+  meta: number | null;
+  acima_meta: boolean;
+  cor: string;
+  percentual: number;
+  valor: number;
+  percentual_cd: number;
+  valor_cd: number;
+  dde: number | null;
+  dde_meta: number | null;
+  bridge: BridgeStatusItem[];
+  top_fornecedores: FornecedorRow[];
+  serie: SegmentoSeriePoint[];
+  serie_cd: SegmentoSeriePoint[];
+  serie_dde: ComiteDdeGeralPonto[];
+}
+
+export interface ComiteDdeGeralPonto {
+  data: IsoDate;
+  valor: number | null;
+}
+
+export interface ComiteCurvaPonto {
+  data: IsoDate;
+  pct: number;
+  pp: number | null;
+  valor: number | null;
+}
+
+export interface ComiteCurvas {
+  disponivel: boolean;
+  pontos: Record<"A" | "B" | "C" | "D", ComiteCurvaPonto[]>;
+}
+
+export interface ComiteResponse {
+  data_referencia: IsoDate;
+  meta_percentual: number;
+  ruptura_sem_cd: KpiRuptura;
+  ruptura_com_cd: KpiRuptura;
+  dde_geral: number | null;
+  top_fornecedores_dde: TopFornecedorDde[];
+  serie_geral: SeriePoint[];
+  serie_geral_cd: SeriePoint[];
+  dde_geral_serie: ComiteDdeGeralPonto[];
+  dde_meta_geral: number;
+  bridge_geral: BridgeStatusItem[];
+  segmentos: ComiteSegmento[];
+  lojas: LojaRow[];
+  loja_critica: LojaDetailResponse | null;
+  curvas: ComiteCurvas;
+}
+
 export interface BriefingLoja {
   nome: string;
   cod_unidade: string;

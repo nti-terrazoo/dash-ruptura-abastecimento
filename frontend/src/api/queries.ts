@@ -5,6 +5,7 @@ import type {
   BridgeDrilldownResponse,
   BridgeMode,
   BridgeResponse,
+  ComiteResponse,
   DatesResponse,
   FornecedoresResponse,
   HealthResponse,
@@ -49,6 +50,7 @@ export const queryKeys = {
   segmentoSeries: (date: string | undefined, segmento: string, days: number, comCd: boolean) =>
     ["segmento-series", date, segmento, days, comCd] as const,
   briefing: (date?: string) => ["briefing", date] as const,
+  comite: (date?: string) => ["comite", date] as const,
 };
 
 export function useHealth() {
@@ -214,6 +216,18 @@ export function useBriefing(date: string | undefined, enabled: boolean) {
   return useQuery({
     queryKey: queryKeys.briefing(date),
     queryFn: () => apiGet<BriefingResponse>("/api/briefing", { date }),
+    enabled,
+    ...defaultQueryOptions,
+  });
+}
+
+/** Payload completo da Apresentacao Comite (sem gate de senha) - a data
+ * usada e sempre a data selecionada na sidebar, nunca uma escolhida na
+ * propria tela do Comite. */
+export function useComite(date: string | undefined, enabled: boolean) {
+  return useQuery({
+    queryKey: queryKeys.comite(date),
+    queryFn: () => apiGet<ComiteResponse>("/api/comite", { date }),
     enabled,
     ...defaultQueryOptions,
   });

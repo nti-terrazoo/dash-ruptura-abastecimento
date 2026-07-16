@@ -145,3 +145,17 @@ def get_fornecedores_range(data_inicio: datetime.date, data_fim: datetime.date) 
 
 def get_dde_segmento_range(data_inicio: datetime.date, data_fim: datetime.date) -> list[dict]:
     return _fetch_for_range("dde_segmento_range", queries.DDE_SEGMENTO_RANGE, data_inicio, data_fim)
+
+
+def get_dde_geral_range(data_inicio: datetime.date, data_fim: datetime.date) -> list[dict]:
+    return _fetch_for_range("dde_geral_range", queries.DDE_GERAL_RANGE, data_inicio, data_fim)
+
+
+def get_curvas_abc_agregado_range(data_inicio: datetime.date, data_fim: datetime.date) -> list[dict]:
+    return _fetch_for_range(
+        "curvas_abc_agregado_range", queries.CURVAS_ABC_AGREGADO_RANGE, data_inicio, data_fim
+    )
+
+
+def get_arq02_curva_range(data_inicio: datetime.date, data_fim: datetime.date) -> list[dict]:
+    return _fetch_for_range("arq02_curva_range", queries.ARQ_02_CURVA_RANGE, data_inicio, data_fim)

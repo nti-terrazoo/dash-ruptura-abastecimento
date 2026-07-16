@@ -223,6 +223,59 @@ class BriefingPauta(BaseModel):
     nome: str | None = None
 
 
+class ComiteDdeGeralPonto(BaseModel):
+    data: datetime.date
+    valor: float | None
+
+
+class ComiteSegmento(BaseModel):
+    segmento: str
+    meta: float | None
+    acima_meta: bool
+    cor: str
+    percentual: float
+    valor: float
+    percentual_cd: float
+    valor_cd: float
+    dde: float | None
+    dde_meta: float | None
+    bridge: list[BridgeStatusItem]
+    top_fornecedores: list[FornecedorRow]
+    serie: list[SegmentoSeriePoint]
+    serie_cd: list[SegmentoSeriePoint]
+    serie_dde: list[ComiteDdeGeralPonto]
+
+
+class ComiteCurvaPonto(BaseModel):
+    data: datetime.date
+    pct: float
+    pp: float | None
+    valor: float | None
+
+
+class ComiteCurvas(BaseModel):
+    disponivel: bool
+    pontos: dict[str, list[ComiteCurvaPonto]]
+
+
+class ComiteResponse(BaseModel):
+    data_referencia: datetime.date
+    meta_percentual: float
+    ruptura_sem_cd: KpiRuptura
+    ruptura_com_cd: KpiRuptura
+    dde_geral: float | None
+    top_fornecedores_dde: list[TopFornecedorDde]
+    serie_geral: list[SeriePoint]
+    serie_geral_cd: list[SeriePoint]
+    dde_geral_serie: list[ComiteDdeGeralPonto]
+    dde_meta_geral: float
+    bridge_geral: list[BridgeStatusItem]
+    segmentos: list[ComiteSegmento]
+    lojas: list[LojaRow]
+    loja_critica: LojaDetailResponse | None
+    curvas: ComiteCurvas
+
+
 class BriefingResponse(BaseModel):
     data_referencia: datetime.date
     ruptura_percentual: float

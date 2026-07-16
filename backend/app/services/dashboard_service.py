@@ -528,6 +528,184 @@ def get_segmento_detail(data_referencia: datetime.date, segmento: str) -> dict:
     }
 
 
+# ══ COMITE — APRESENTACAO (PPTX) ═══════════════════════════════════════
+# Agrega tudo que o frontend precisa num unico payload,
+# reaproveitando os services ja existentes (nada e recalculado do zero)
+
+CURVAS = ("A", "B", "C", "D")
+CURVAS_ABC_HISTORY_DIAS = 60
+
+
+def get_curvas_abc(data_referencia: datetime.date, dias: int = CURVAS_ABC_HISTORY_DIAS) -> dict:
+    """Ruptura por curva ABC (A/B/C/D) agregada por dia. Fonte: queries 13
+    (VW_DASH_ARQ_01_CURCA, ja agregada por curva no proprio Oracle via
+    queries.CURVAS_ABC_AGREGADO_RANGE) e 14 (VW_DASH_ARQ_02_CURCA, ruptura
+    geral do dia usada para repartir "pp"/"valor" proporcionalmente entre as
+    curvas - equivalente ao _raw10/av_ do dash_2.html). Substitui o upload
+    manual de planilhas do Comite legado por consulta direta ao banco.
+    Produto sem classificacao em DASH_RUPTURA_PROD_CURVA cai na curva D (a
+    regra e aplicada na propria query via NVL, nao aqui)."""
+    inicio = data_referencia - datetime.timedelta(days=dias - 1)
+    agg_rows = raw_data.get_curvas_abc_agregado_range(inicio, data_referencia)
+    aux_rows = raw_data.get_arq02_curva_range(inicio, data_referencia)
+
+    por_data: dict[datetime.date, dict[str, dict]] = {}
+    for row in agg_rows:
+        data = row["data_referencia"]
+        curva = (row.get("classificacao") or "D").strip().upper()
+        if curva not in CURVAS:
+            curva = "D"
+        entry = por_data.setdefault(data, {c: {"ruptura": 0.0, "potencial": 0.0} for c in CURVAS})
+        entry[curva]["ruptura"] += row.get("ruptura_valor_venda") or 0.0
+        entry[curva]["potencial"] += row.get("potencial") or 0.0
+
+    aux_by_data = {
+        row["data_referencia"]: {
+            "valor": row.get("ruptura_valor_venda") or 0.0,
+            "percentual": normalize_percentual(row.get("ruptura_percentual") or 0.0),
+        }
+        for row in aux_rows
+    }
+
+    pontos: dict[str, list[dict]] = {c: [] for c in CURVAS}
+    for data in sorted(por_data):
+        grupos = por_data[data]
+        ruptura_total = sum(g["ruptura"] for g in grupos.values())
+        aux = aux_by_data.get(data)
+        for c in CURVAS:
+            g = grupos[c]
+            pct = (g["ruptura"] / g["potencial"] * 100) if g["potencial"] > 0 else 0.0
+            pp = valor = None
+            if aux is not None:
+                share = (g["ruptura"] / ruptura_total) if ruptura_total > 0 else 0.0
+                pp = round(aux["percentual"] * share, 2)
+                valor = round(aux["valor"] * share, 2)
+            pontos[c].append({"data": data, "pct": round(pct, 4), "pp": pp, "valor": valor})
+
+    disponivel = any(pontos[c] for c in CURVAS)
+    return {"disponivel": disponivel, "pontos": pontos}
+
+
+def _comite_segmento(
+    seg: str,
+    data_referencia: datetime.date,
+    seg_today_by_norm: dict[str, dict],
+    seg_cd_today_by_norm: dict[str, dict],
+) -> dict:
+    vals = seg_today_by_norm.get(seg, {"valor": 0.0, "percentual": 0.0})
+    vals_cd = seg_cd_today_by_norm.get(seg, {"valor": 0.0, "percentual": 0.0})
+    meta = SEG_METAS.get(seg)
+    acima = meta is not None and vals["percentual"] > meta
+    dde_row = next(
+        (r for r in raw_data.get_dde_segmento(data_referencia) if norm_seg(r.get("segmento")) == seg), None
+    )
+    bridge_resp = get_bridge(data_referencia, mode="segmento", chave=seg)
+    fornecedores = get_fornecedores(data_referencia, segmento=seg)["ranking"][:10]
+    serie = get_segmento_series(seg, data_referencia, dias=15, com_cd=False)["pontos"]
+    serie_cd = get_segmento_series(seg, data_referencia, dias=15, com_cd=True)["pontos"]
+    inicio_15 = data_referencia - datetime.timedelta(days=14)
+    serie_dde = sorted(
+        (
+            {"data": r["data_referencia"], "valor": r.get("dias_estoque")}
+            for r in raw_data.get_dde_segmento_range(inicio_15, data_referencia)
+            if norm_seg(r.get("segmento")) == seg
+        ),
+        key=lambda p: p["data"],
+    )
+
+    return {
+        "segmento": seg,
+        "meta": meta,
+        "acima_meta": acima,
+        "cor": "#e05555" if acima else segmento_color(seg),
+        "percentual": vals["percentual"],
+        "valor": vals["valor"],
+        "percentual_cd": vals_cd["percentual"],
+        "valor_cd": vals_cd["valor"],
+        "dde": dde_row.get("dias_estoque") if dde_row else None,
+        "dde_meta": get_dde_meta(seg, data_referencia),
+        "bridge": bridge_resp["statuses"],
+        "top_fornecedores": fornecedores,
+        "serie": serie,
+        "serie_cd": serie_cd,
+        "serie_dde": serie_dde,
+    }
+
+
+def get_comite(data_referencia: datetime.date) -> dict:
+    """Payload completo para a Apresentacao Comite - a data usada e sempre a
+    data de referencia selecionada na sidebar (nao ha selecao propria na
+    tela do Comite)."""
+    overview = get_overview(data_referencia)
+
+    seg_today_by_norm = {norm_seg(seg): vals for seg, vals in get_segmentos_today(data_referencia).items()}
+    seg_cd_today_by_norm = {
+        norm_seg(row.get("segmento")): {
+            "percentual": normalize_percentual(row.get("ruptura_percentual") or 0.0),
+            "valor": row.get("ruptura_valor_venda") or 0.0,
+        }
+        for row in raw_data.get_planilha_grafico_cd(data_referencia)
+    }
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=len(VALID_SEGMENTOS)) as executor:
+        segmentos = list(
+            executor.map(
+                lambda seg: _comite_segmento(seg, data_referencia, seg_today_by_norm, seg_cd_today_by_norm),
+                VALID_SEGMENTOS,
+            )
+        )
+
+    lojas = get_lojas(data_referencia)["lojas"]
+    lojas_criticas_ord = sorted(
+        (l for l in lojas if l["percentual"] > 10), key=lambda l: l["percentual"], reverse=True
+    )
+    loja_critica_row = lojas_criticas_ord[0] if lojas_criticas_ord else (lojas[0] if lojas else None)
+    loja_critica = (
+        get_loja_detail(data_referencia, loja_critica_row["cod_unidade"]) if loja_critica_row else None
+    )
+
+    inicio_15 = data_referencia - datetime.timedelta(days=14)
+    dde_geral_serie = [
+        {"data": r["data_referencia"], "valor": r.get("dias_estoque")}
+        for r in raw_data.get_dde_geral_range(inicio_15, data_referencia)
+    ]
+    # Nao ha uma meta de DDE geral real (so por segmento) - o legado usa
+    # PET FOOD como proxy pra linha de referencia do grafico geral, com
+    # fallback 96 (dash_2.html, gerarPPTX(): "ddeMetaGeral").
+    dde_meta_geral = get_dde_meta("PET FOOD", data_referencia) or 96
+
+    # Fornecedores com MENOR DDE (giro mais rapido/risco de ruptura) - usado
+    # no card de DDE Geral do PPTX (dash_2.html, gerarPPTX(): "top3DDE").
+    # Diferente de overview["top_fornecedores_dde"], que e ordenado de forma
+    # DESCENDENTE (maior DDE primeiro) para outro proposito na Visao Geral.
+    top_fornecedores_dde_baixo = sorted(
+        (
+            {"fornecedor": r.get("nome_fantasia_fornecedor"), "dde": r["dias_estoque"]}
+            for r in raw_data.get_dde_fornecedor(data_referencia)
+            if r.get("dias_estoque") and 0 < r["dias_estoque"] <= 400
+        ),
+        key=lambda x: x["dde"],
+    )[:3]
+
+    return {
+        "data_referencia": data_referencia,
+        "meta_percentual": 10.0,
+        "ruptura_sem_cd": overview["ruptura_sem_cd"],
+        "ruptura_com_cd": overview["ruptura_com_cd"],
+        "dde_geral": overview["dde_geral"],
+        "top_fornecedores_dde": top_fornecedores_dde_baixo,
+        "serie_geral": get_series(data_referencia, dias=15, com_cd=False)["pontos"],
+        "serie_geral_cd": get_series(data_referencia, dias=15, com_cd=True)["pontos"],
+        "dde_geral_serie": dde_geral_serie,
+        "dde_meta_geral": dde_meta_geral,
+        "bridge_geral": get_bridge(data_referencia, mode="geral")["statuses"],
+        "segmentos": segmentos,
+        "lojas": lojas,
+        "loja_critica": loja_critica,
+        "curvas": get_curvas_abc(data_referencia),
+    }
+
+
 # Meta geral de ruptura usada no briefing (igual ao resto do dashboard) e o
 # fallback de meta por segmento quando o segmento nao esta em SEG_METAS -
 # replica `SEG_METAS[x]||10` do HTML legado (dash_2.html, renderBriefing()).
