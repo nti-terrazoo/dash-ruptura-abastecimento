@@ -88,12 +88,17 @@ def get_segmentos_today(data_referencia: datetime.date) -> dict[str, dict]:
             continue
         result[seg] = {"valor": valor, "percentual": percentual}
 
-    missing = [s for s in VALID_SEGMENTOS if s not in result]
+    # Compara pela forma normalizada (norm_seg) em vez de string exata: as
+    # chaves de "result" sao o segmento cru da view (com "PET" preservado),
+    # que pode nao bater byte-a-byte com VALID_SEGMENTOS mesmo quando e o
+    # mesmo segmento (ex. grafia/espacamento diferente entre views).
+    covered = {norm_seg(s) for s in result}
+    missing = [s for s in VALID_SEGMENTOS if s not in covered]
     if missing:
         agg: dict[str, dict] = {}
         for row in raw_data.get_planilha_geral(data_referencia):
             seg = row.get("segmento")
-            if seg not in missing:
+            if norm_seg(seg) not in missing:
                 continue
             valor = row.get("ruptura_valor_venda") or 0.0
             percentual = normalize_percentual(row.get("ruptura_percentual") or 0.0)
@@ -143,7 +148,7 @@ def get_overview(data_referencia: datetime.date) -> dict:
 
     ruptura_por_segmento = []
     for seg, vals in seg_today.items():
-        meta = SEG_METAS.get(seg)
+        meta = SEG_METAS.get(norm_seg(seg))
         acima = meta is not None and vals["percentual"] > meta
         ruptura_por_segmento.append(
             {
@@ -573,10 +578,14 @@ def get_briefing(data_referencia: datetime.date) -> dict:
     segmentos_hoje = [{"segmento": seg, **vals} for seg, vals in seg_today.items()]
     segmento_critico = max(segmentos_hoje, key=lambda s: s["percentual"], default=None)
     segmentos_acima_meta = sum(
-        1 for s in segmentos_hoje if s["percentual"] > SEG_METAS.get(s["segmento"], BRIEFING_META_SEGMENTO_FALLBACK)
+        1
+        for s in segmentos_hoje
+        if s["percentual"] > SEG_METAS.get(norm_seg(s["segmento"]), BRIEFING_META_SEGMENTO_FALLBACK)
     )
     segmento_critico_meta = (
-        SEG_METAS.get(segmento_critico["segmento"], BRIEFING_META_SEGMENTO_FALLBACK) if segmento_critico else None
+        SEG_METAS.get(norm_seg(segmento_critico["segmento"]), BRIEFING_META_SEGMENTO_FALLBACK)
+        if segmento_critico
+        else None
     )
 
     bridge = get_bridge(data_referencia, mode="geral")

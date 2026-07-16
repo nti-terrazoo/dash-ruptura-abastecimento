@@ -45,7 +45,7 @@ def test_tendencia_classification_thresholds():
 def test_pautas_omitted_when_nothing_critical():
     multi, dde_patch, bridge_patch = _patch_briefing_deps(
         pontos=[{"percentual": 5.0, "valor": 100.0}],
-        seg_today={"FOOD": {"valor": 10.0, "percentual": 2.0}},
+        seg_today={"PET FOOD": {"valor": 10.0, "percentual": 2.0}},
         bridge_statuses=[
             {"label": "Sit. Crítica s/ Pedido", "color": "#ff9999", "valor": 0.0, "pp": 0.0},
             {"label": "CD Atende Loja", "color": "#34c97a", "valor": 0.0, "pp": 0.0},
@@ -66,7 +66,10 @@ def test_pautas_omitted_when_nothing_critical():
 def test_pautas_generated_for_each_critical_condition():
     multi, dde_patch, bridge_patch = _patch_briefing_deps(
         pontos=[{"percentual": 12.0, "valor": 50000.0}],
-        seg_today={"ACESSORIOS": {"valor": 3000.0, "percentual": 45.0}, "FOOD": {"valor": 1000.0, "percentual": 5.0}},
+        seg_today={
+            "PET ACESSORIOS": {"valor": 3000.0, "percentual": 45.0},
+            "PET FOOD": {"valor": 1000.0, "percentual": 5.0},
+        },
         bridge_statuses=[
             {"label": "Sit. Crítica s/ Pedido", "color": "#ff9999", "valor": 8000.0, "pp": 3.0},
             {"label": "CD Atende Loja", "color": "#34c97a", "valor": 4000.0, "pp": 1.5},
@@ -86,12 +89,12 @@ def test_pautas_generated_for_each_critical_condition():
     by_tipo = {p["tipo"]: p for p in result["pautas"]}
     assert by_tipo["sem_pedido"]["valor"] == 8000.0
     assert by_tipo["loja_critica"]["nome"] == "Loja Critica"
-    assert by_tipo["segmento_meta"]["nome"] == "ACESSORIOS"
-    assert by_tipo["segmento_meta"]["meta"] == 20.0  # SEG_METAS['ACESSORIOS']
+    assert by_tipo["segmento_meta"]["nome"] == "PET ACESSORIOS"
+    assert by_tipo["segmento_meta"]["meta"] == 20.0  # SEG_METAS['PET ACESSORIOS']
     assert by_tipo["fornecedor"]["nome"] == "Fornecedor X"
     assert by_tipo["cd_atende"]["valor"] == 4000.0
 
-    assert result["segmento_critico"] == "ACESSORIOS"
+    assert result["segmento_critico"] == "PET ACESSORIOS"
     assert result["segmentos_acima_meta"] == 1
     assert result["acima_meta_geral"] is True
 

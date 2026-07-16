@@ -18,12 +18,12 @@ from app.core.calculations import (
 
 
 def test_norm_seg_aliases_and_pet_prefix():
-    assert norm_seg("PETFOOD") == "FOOD"
-    assert norm_seg("PET FOOD") == "FOOD"
-    assert norm_seg("Farmácia") == "FARMACIA"
-    assert norm_seg("PET AQUARISMO") == "AQUARISMO"
-    assert norm_seg("PET Fauna") == "FAUNA"  # alias casa case-insensitive
-    assert norm_seg("PET Novidade") == "Novidade"  # sem alias -> so remove prefixo "PET "
+    assert norm_seg("PETFOOD") == "PET FOOD"
+    assert norm_seg("PET FOOD") == "PET FOOD"
+    assert norm_seg("Farmácia") == "PET FARMACIA"
+    assert norm_seg("PET AQUARISMO") == "PET AQUARISMO"
+    assert norm_seg("PET Fauna") == "PET FAUNA"  # alias casa case-insensitive
+    assert norm_seg("PET Novidade") == "PET NOVIDADE"  # sem alias -> so remove prefixo "PET "
     assert norm_seg("JARDINAGEM") == "JARDINAGEM"
     assert norm_seg("") == ""
     assert norm_seg(None) == ""
@@ -49,7 +49,7 @@ def test_normalize_percentual_treats_fraction_as_percent():
 )
 def test_get_dde_meta_clamps_outside_range(mes, esperado):
     referencia = datetime.date(2026, mes, 15)
-    assert get_dde_meta("FARMACIA", referencia) == esperado
+    assert get_dde_meta("PET FARMACIA", referencia) == esperado
 
 
 def test_get_dde_meta_unknown_segment_returns_none():

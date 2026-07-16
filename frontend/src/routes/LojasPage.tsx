@@ -138,7 +138,7 @@ export function LojasPage() {
             const detail = detailQuery.data;
             const maxOfensor = detail.segmentos_ofensores[0]?.valor || 1;
             const filteredItens = activeSeg
-              ? detail.top_itens.filter((it) => (it.segmento ?? "").replace("PET ", "") === activeSeg.replace("PET ", ""))
+              ? detail.top_itens.filter((it) => it.segmento === activeSeg)
               : detail.top_itens;
 
             return (
@@ -193,7 +193,7 @@ export function LojasPage() {
                           onClick={() => setActiveSeg(isActive ? null : s.segmento)}
                         >
                           <span className={styles.offensorLabel} style={{ color }}>
-                            {s.segmento.replace("PET ", "")}
+                            {s.segmento}
                           </span>
                           <div className={styles.offensorBarWrap}>
                             <div className={styles.offensorBarTrack}>
@@ -212,7 +212,7 @@ export function LojasPage() {
                 </div>
 
                 <div className={styles.drawerSectionLast}>
-                  <div className="section-title">{activeSeg ? `Top 10 — ${activeSeg.replace("PET ", "")}` : "Top 10 Itens"}</div>
+                  <div className="section-title">{activeSeg ? `Top 10 — ${activeSeg}` : "Top 10 Itens"}</div>
                   <div className={styles.itemsList}>
                     {filteredItens.length === 0 ? (
                       <div className={styles.emptyMsg} style={{ padding: 12 }}>

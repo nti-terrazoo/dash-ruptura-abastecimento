@@ -22,7 +22,7 @@ const MODES: { value: BridgeMode; label: string }[] = [
 
 // Selecionados por padrao ao abrir cada aba, para a tela ja exibir algo em
 // vez do skeleton vazio esperando um clique do usuario.
-const DEFAULT_SEGMENTO = "ACESSORIOS";
+const DEFAULT_SEGMENTO = "PET FOOD";
 const DEFAULT_LOJA_NOME = "AFRICANOS";
 
 export function BridgePage() {

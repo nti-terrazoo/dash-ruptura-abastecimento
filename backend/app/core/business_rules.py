@@ -7,37 +7,42 @@ alterar metas com frequencia, isso deve virar uma tabela administravel.
 
 from datetime import date
 
-# % de ruptura meta por segmento.
+# % de ruptura meta por segmento. Chaves na forma canonica exibida ao
+# usuario - o prefixo "PET" e mantido para os segmentos que realmente o tem
+# na fonte de dados/na tela (FOOD, FARMACIA, HIGIENE E BELEZA, ACESSORIOS,
+# FAUNA, AQUARISMO); JARDINAGEM/AGROPECUARIA/LAZER nunca o tiveram.
 SEG_METAS: dict[str, float] = {
-    "FOOD": 8,
-    "FARMACIA": 5,
+    "PET FOOD": 8,
+    "PET FARMACIA": 5,
     "JARDINAGEM": 15,
     "AGROPECUARIA": 12,
-    "HIGIENE E BELEZA": 13,
-    "ACESSORIOS": 20,
-    "FAUNA": 20,
-    "AQUARISMO": 15,
+    "PET HIGIENE E BELEZA": 13,
+    "PET ACESSORIOS": 20,
+    "PET FAUNA": 20,
+    "PET AQUARISMO": 15,
     "LAZER": 20,
 }
 
 VALID_SEGMENTOS: list[str] = list(SEG_METAS.keys())
 
 # Aliases de nome de segmento vindos da fonte de dados -> nome canonico.
+# NAO remove o prefixo "PET" (ele faz parte do nome real do segmento) - so
+# resolve variantes de grafia/espacamento/acentuacao para uma unica forma.
 SEG_ALIAS: dict[str, str] = {
-    "PETFOOD": "FOOD",
-    "PET FOOD": "FOOD",
-    "FARMÁCIA": "FARMACIA",
-    "PET FARMACIA": "FARMACIA",
-    "PETFARMACIA": "FARMACIA",
-    "HIGIENE E BELEZA": "HIGIENE E BELEZA",
-    "PET HIGIENE E BELEZA": "HIGIENE E BELEZA",
-    "PETHIGIENE E BELEZA": "HIGIENE E BELEZA",
-    "PET ACESSORIOS": "ACESSORIOS",
-    "PETACESSORIOS": "ACESSORIOS",
-    "PET FAUNA": "FAUNA",
-    "PETFAUNA": "FAUNA",
-    "PET AQUARISMO": "AQUARISMO",
-    "PETAQUARISMO": "AQUARISMO",
+    "PETFOOD": "PET FOOD",
+    "PET FOOD": "PET FOOD",
+    "FARMÁCIA": "PET FARMACIA",
+    "PET FARMACIA": "PET FARMACIA",
+    "PETFARMACIA": "PET FARMACIA",
+    "HIGIENE E BELEZA": "PET HIGIENE E BELEZA",
+    "PET HIGIENE E BELEZA": "PET HIGIENE E BELEZA",
+    "PETHIGIENE E BELEZA": "PET HIGIENE E BELEZA",
+    "PET ACESSORIOS": "PET ACESSORIOS",
+    "PETACESSORIOS": "PET ACESSORIOS",
+    "PET FAUNA": "PET FAUNA",
+    "PETFAUNA": "PET FAUNA",
+    "PET AQUARISMO": "PET AQUARISMO",
+    "PETAQUARISMO": "PET AQUARISMO",
     "AGROPECUÁRIA": "AGROPECUARIA",
     "JARDINAGEM": "JARDINAGEM",
     "LAZER": "LAZER",
@@ -46,14 +51,14 @@ SEG_ALIAS: dict[str, str] = {
 # Meta mensal de DDE (dias de estoque) por segmento - "Proposta DDE 180+".
 # Indice 0 = marco/2026 ... indice 9 = dezembro/2026 (10 meses).
 DDE_META_SEG: dict[str, list[int]] = {
-    "FARMACIA": [118, 117, 115, 113, 111, 110, 108, 108, 108, 108],
-    "FOOD": [62, 61, 61, 60, 59, 59, 58, 58, 58, 58],
+    "PET FARMACIA": [118, 117, 115, 113, 111, 110, 108, 108, 108, 108],
+    "PET FOOD": [62, 61, 61, 60, 59, 59, 58, 58, 58, 58],
     "JARDINAGEM": [131, 128, 124, 121, 117, 113, 110, 110, 110, 110],
     "AGROPECUARIA": [105, 102, 99, 96, 93, 90, 87, 87, 87, 87],
-    "ACESSORIOS": [381, 366, 351, 336, 321, 306, 291, 291, 291, 291],
-    "HIGIENE E BELEZA": [88, 86, 85, 84, 82, 81, 80, 80, 80, 80],
-    "FAUNA": [95, 93, 91, 88, 86, 84, 82, 82, 82, 82],
-    "AQUARISMO": [168, 163, 158, 152, 147, 142, 136, 136, 136, 136],
+    "PET ACESSORIOS": [381, 366, 351, 336, 321, 306, 291, 291, 291, 291],
+    "PET HIGIENE E BELEZA": [88, 86, 85, 84, 82, 81, 80, 80, 80, 80],
+    "PET FAUNA": [95, 93, 91, 88, 86, 84, 82, 82, 82, 82],
+    "PET AQUARISMO": [168, 163, 158, 152, 147, 142, 136, 136, 136, 136],
     "LAZER": [85, 83, 82, 80, 79, 77, 76, 76, 76, 76],
 }
 DDE_META_SEG_FIRST_MONTH = 3  # marco
@@ -138,24 +143,22 @@ SEGMENTO_COLOR_PALETTE: list[str] = [
 
 def segmento_color(segmento: str) -> str:
     try:
-        idx = VALID_SEGMENTOS.index(segmento)
+        idx = VALID_SEGMENTOS.index(norm_seg(segmento))
     except ValueError:
         idx = 0
     return SEGMENTO_COLOR_PALETTE[idx % len(SEGMENTO_COLOR_PALETTE)]
 
 
 def norm_seg(segmento: str | None) -> str:
-    """Normaliza nome de segmento (alias -> canonico; remove prefixo 'PET')."""
+    """Normaliza nome de segmento: resolve variantes de grafia (com/sem
+    espaco, acentuacao) para uma forma canonica unica, usada so para
+    casamento/agrupamento entre views diferentes. NUNCA remove o prefixo
+    "PET" - ele faz parte do nome real do segmento e deve aparecer na tela
+    (ver SEG_ALIAS/SEG_METAS, onde o prefixo e mantido)."""
     if not segmento:
         return ""
     up = segmento.strip().upper()
-    if up in SEG_ALIAS:
-        return SEG_ALIAS[up]
-    if up.startswith("PET "):
-        return segmento.strip()[4:].strip()
-    if up.startswith("PET"):
-        return segmento.strip()[3:].strip()
-    return segmento.strip()
+    return SEG_ALIAS.get(up, up)
 
 
 def is_excluded_store(nome_loja: str) -> bool:

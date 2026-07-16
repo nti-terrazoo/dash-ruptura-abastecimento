@@ -192,7 +192,7 @@ export function OverviewPage() {
                 <div>
                   <div className={styles.criticoFieldLabel}>Seg.</div>
                   <div className={styles.criticoSeg} style={{ color: criticoSegCor ?? "var(--g1)" }}>
-                    {itemCritico.segmento?.replace("PET ", "") ?? "—"}
+                    {itemCritico.segmento ?? "—"}
                   </div>
                 </div>
               </div>
