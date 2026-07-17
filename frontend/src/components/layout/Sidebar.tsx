@@ -102,8 +102,6 @@ export function Sidebar() {
         <BriefingLauncher />
       </div>
 
-      <div className={styles.footer}>Criado por Abner Santos</div>
-
       <button
         type="button"
         className={`${styles.toggle} ${collapsed ? styles.flipped : ""}`}
