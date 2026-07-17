@@ -1,4 +1,4 @@
-"""Aquece o cache uma vez por dia (por padrao as 01:00, ver
+"""Aquece o cache uma vez por dia (por padrao as 08:00, ver
 CACHE_WARMUP_HOUR/MINUTE em app/config.py), logo apos o horario tipico do
 ETL noturno do Oracle publicar o novo dia. Sem isso, a primeira pessoa a
 abrir o dashboard de manha pagaria o custo da bridge geral sozinha (pode

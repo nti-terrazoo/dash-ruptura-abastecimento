@@ -123,7 +123,7 @@ disponivel):
   curto e separado (`DATES_CACHE_TTL_SECONDS`, default 10 min) para o backend
   perceber rapido quando o ETL publica um novo dia.
 - **Warm-up diario agendado** (`app/jobs/cache_warmup.py`, via APScheduler)
-  roda todo dia as `CACHE_WARMUP_HOUR:CACHE_WARMUP_MINUTE` (default 01:00 -
+  roda todo dia as `CACHE_WARMUP_HOUR:CACHE_WARMUP_MINUTE` (default 08:00 -
   ajuste para logo depois do horario do ETL noturno do Oracle) e pre-carrega
   o cache com a visao padrao de cada aba (Visao Geral, Lojas, Fornecedores,
   Bridge geral, Ruptura Segmentos para os 9 segmentos) para a data mais

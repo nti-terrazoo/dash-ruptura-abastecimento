@@ -28,7 +28,7 @@ class Settings(BaseSettings):
 
     # Horario do job diario que aquece o cache do dia mais recente (ver
     # app/jobs/cache_warmup.py) - default logo apos o ETL noturno do Oracle.
-    cache_warmup_hour: int = 1
+    cache_warmup_hour: int = 8
     cache_warmup_minute: int = 0
 
     cors_origins: str = "http://localhost:5173,http://localhost:3000"
