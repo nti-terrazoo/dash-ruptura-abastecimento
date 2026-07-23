@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useDates } from "../api/queries";
 
@@ -14,6 +14,16 @@ export function useSelectedDate() {
 
   const dateParam = searchParams.get("date");
   const selectedDate = dateParam ?? datesQuery.data?.default ?? undefined;
+  const rawDates = datesQuery.data?.dates ?? [];
+
+  // Se o usuario escolher (via calendario) uma data fora da janela de 1 mes
+  // trazida pelo backend, ela nao aparece em `rawDates` - inserimos aqui na
+  // posicao cronologica correta (lista sempre decrescente) para o select
+  // continuar refletindo a data selecionada.
+  const availableDates = useMemo(() => {
+    if (!selectedDate || rawDates.includes(selectedDate)) return rawDates;
+    return [...rawDates, selectedDate].sort((a, b) => b.localeCompare(a));
+  }, [rawDates, selectedDate]);
 
   const setSelectedDate = useCallback(
     (date: string) => {
@@ -32,7 +42,7 @@ export function useSelectedDate() {
   return {
     selectedDate,
     setSelectedDate,
-    availableDates: datesQuery.data?.dates ?? [],
+    availableDates,
     isLoading: datesQuery.isLoading,
   };
 }

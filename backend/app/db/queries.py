@@ -169,14 +169,16 @@ DDE_SEGMENTO = """
 
 # Usada por /api/dates. VW_DASH_DIA_A_DIA tem uma linha por data de
 # referencia, entao serve como fonte confiavel das datas disponiveis.
-# ROWNUM em vez de FETCH FIRST porque o Oracle e 11g.
+# Traz so os dias com dados no ultimo mes, contando a partir do registro
+# mais recente (e nao um calendario cheio, ja que nem todo dia tem dado).
 AVAILABLE_DATES = """
-    SELECT DATA_REFERENCIA FROM (
-        SELECT DISTINCT DATA_REFERENCIA
+    SELECT DISTINCT DATA_REFERENCIA
+    FROM {schema}.VW_DASH_DIA_A_DIA
+    WHERE DATA_REFERENCIA >= (
+        SELECT ADD_MONTHS(MAX(DATA_REFERENCIA), :months * -1)
         FROM {schema}.VW_DASH_DIA_A_DIA
-        ORDER BY DATA_REFERENCIA DESC
     )
-    WHERE ROWNUM <= :limit
+    ORDER BY DATA_REFERENCIA DESC
 """
 
 # Series historicas (para os graficos de evolucao diaria / segmentos) -

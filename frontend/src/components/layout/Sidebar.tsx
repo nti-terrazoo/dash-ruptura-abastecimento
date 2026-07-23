@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import logo from "../../assets/logo.webp";
@@ -9,6 +9,7 @@ import { useSidebarCollapsed } from "../../hooks/useSidebarCollapsed";
 import { formatDateFull } from "../../lib/format";
 import {
   BridgeIcon,
+  CalendarIcon,
   ChevronIcon,
   FornecedoresIcon,
   LojasIcon,
@@ -31,6 +32,7 @@ export function Sidebar() {
   const { selectedDate, setSelectedDate, availableDates } = useSelectedDate();
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
+  const calendarInputRef = useRef<HTMLInputElement>(null);
   // Preserva ?date= (e qualquer outro query param) ao trocar de aba - sem
   // isso, NavLink navega para o path puro e a data selecionada se perde.
   const location = useLocation();
@@ -73,17 +75,49 @@ export function Sidebar() {
       <div className={styles.dividerBottom} />
 
       <div className={styles.controls}>
-        <select
-          className={styles.datePicker}
-          value={selectedDate ?? ""}
-          onChange={(event) => setSelectedDate(event.target.value)}
-        >
-          {availableDates.map((date) => (
-            <option key={date} value={date}>
-              {formatDateFull(date)}
-            </option>
-          ))}
-        </select>
+        <div className={styles.dateRow}>
+          <select
+            className={styles.datePicker}
+            value={selectedDate ?? ""}
+            onChange={(event) => setSelectedDate(event.target.value)}
+          >
+            {availableDates.map((date) => (
+              <option key={date} value={date}>
+                {formatDateFull(date)}
+              </option>
+            ))}
+          </select>
+
+          <button
+            type="button"
+            className={styles.calendarBtn}
+            onClick={() => {
+              const input = calendarInputRef.current;
+              if (!input) return;
+              if (typeof input.showPicker === "function") {
+                input.showPicker();
+              } else {
+                input.click();
+              }
+            }}
+            aria-label="Escolher data no calendário"
+            title="Escolher data no calendário"
+          >
+            <CalendarIcon />
+          </button>
+          <input
+            ref={calendarInputRef}
+            type="date"
+            className={styles.calendarInput}
+            value={selectedDate ?? ""}
+            max={availableDates[0]}
+            onChange={(event) => {
+              if (event.target.value) setSelectedDate(event.target.value);
+            }}
+            tabIndex={-1}
+            aria-hidden="true"
+          />
+        </div>
 
         <div className={styles.tsPill}>
           <span className={styles.liveDot} />

@@ -115,12 +115,12 @@ def get_dde_segmento(data_referencia: datetime.date) -> list[dict]:
     return _fetch_for_date("dde_segmento", queries.DDE_SEGMENTO, data_referencia)
 
 
-def get_available_dates(limit: int = 15) -> list[datetime.date]:
+def get_available_dates(months: int = 1) -> list[datetime.date]:
     def loader():
-        rows = _run(queries.AVAILABLE_DATES, {"limit": limit})
+        rows = _run(queries.AVAILABLE_DATES, {"months": months})
         return [row["data_referencia"] for row in rows]
 
-    return cached_dates(("available_dates", str(limit)), loader)
+    return cached_dates(("available_dates", str(months)), loader)
 
 
 def get_dia_a_dia_range(data_inicio: datetime.date, data_fim: datetime.date) -> list[dict]:

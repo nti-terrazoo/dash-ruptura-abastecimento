@@ -142,8 +142,15 @@
   display: none;
 }
 
+.dateRow {
+  position: relative;
+  display: flex;
+  gap: 6px;
+}
+
 .datePicker {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #ffffff;
@@ -155,6 +162,35 @@
 
 .datePicker option {
   color: #1a2e22;
+}
+
+.calendarBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.calendarBtn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.calendarInput {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 28px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  border: none;
 }
 
 .tsPill {
