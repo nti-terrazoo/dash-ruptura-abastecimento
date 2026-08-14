@@ -60,7 +60,7 @@ def warm_cache() -> None:
     _run_step("fornecedores", dashboard_service.get_fornecedores, data_referencia, segmento="TODOS")
 
     # A bridge geral e a consulta mais pesada do dashboard (varre a
-    # VW_DASH_LOJAS_BRIDGE inteira) - uma vez cacheada aqui, o detalhe de
+    # DASH_LOJAS_BRIDGE inteira) - uma vez cacheada aqui, o detalhe de
     # cada segmento abaixo reaproveita o mesmo resultado (mesma chave de
     # cache em raw_data.get_lojas_bridge) em vez de repetir a varredura.
     _run_step("bridge geral", dashboard_service.get_bridge, data_referencia, mode="geral")

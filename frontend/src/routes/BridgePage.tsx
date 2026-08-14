@@ -96,7 +96,7 @@ export function BridgePage() {
 
       {!data ? (
         <div className="grid-bridge">
-          {Array.from({ length: 5 }).map((_, i) => (
+          {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} height={90} />
           ))}
         </div>

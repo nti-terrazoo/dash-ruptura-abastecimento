@@ -12,7 +12,7 @@ import { SEGMENTOS } from "../lib/segmentos";
  * nao refaz a requisicao.
  *
  * A bridge geral em particular e a consulta mais lenta do dashboard (varre
- * a VW_DASH_LOJAS_BRIDGE inteira - ver dashboard_service.get_bridge/
+ * a DASH_LOJAS_BRIDGE inteira - ver dashboard_service.get_bridge/
  * get_overview_item_critico no backend), entao aquecer o cache dela
  * enquanto o usuario ainda esta lendo a Visao Geral e o que mais reduz a
  * espera percebida ao trocar de aba.

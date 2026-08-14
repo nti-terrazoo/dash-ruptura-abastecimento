@@ -6,7 +6,7 @@ from app.cache import cached, cached_dates, clear_cache
 
 def test_cached_dedupes_concurrent_calls_for_same_key():
     """Duas requisicoes concorrentes para a mesma chave (ex: bridge geral e
-    detalhe de segmento, que internamente leem a mesma VW_DASH_LOJAS_BRIDGE)
+    detalhe de segmento, que internamente leem a mesma DASH_LOJAS_BRIDGE)
     devem disparar o loader lento uma unica vez - a segunda espera a
     primeira em vez de repetir o round-trip ao Oracle."""
     clear_cache()

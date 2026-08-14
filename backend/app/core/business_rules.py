@@ -78,7 +78,7 @@ def get_dde_meta(segmento: str, referencia: date) -> float | None:
     return metas[mes - DDE_META_SEG_FIRST_MONTH]
 
 
-# Definicao dos 5 status da "bridge" (waterfall Meta -> Ruptura Atual).
+# Definicao dos 6 status da "bridge" (waterfall Meta -> Ruptura Atual).
 # "keys" sao substrings (case-insensitive) usadas para casar com o texto
 # livre de SITUACAO vindo da view - a primeira categoria cujo array bate e
 # usada (ordem importa).
@@ -92,6 +92,11 @@ BRIDGE_STATUS_DEFS: list[dict] = [
         "label": "Sit. Crítica s/ Pedido",
         "keys": ["SEM PEDIDO", "SITUAÇÃO CRÍTICA - SEM", "SITUACAO CRITICA - SEM", "- SEM"],
         "color": "#ff9999",
+    },
+    {
+        "label": "Situação Crítica – PEDIDO PARCIAL",
+        "keys": ["SITUAÇÃO CRÍTICA - PEDIDO PARCIAL", "SITUACAO CRITICA - PEDIDO PARCIAL", "PEDIDO PARCIAL"],
+        "color": "#a15fd6",
     },
     {
         "label": "CD Insuficiente",
@@ -110,9 +115,31 @@ BRIDGE_STATUS_DEFS: list[dict] = [
     },
 ]
 
+# Ordem de casamento usada por match_bridge_status - INDEPENDENTE da ordem de
+# exibicao acima. "PEDIDO PARCIAL" precisa ser testado antes de "Sit. Critica
+# c/ Pedido", porque as keys genericas desse ultimo ("- PEDIDO", "SITUACAO
+# CRITICA - PEDIDO") tambem casam como substring em textos de pedido parcial
+# (ex: "SITUACAO CRITICA - PEDIDO PARCIAL" contem "- PEDIDO"). Sem essa
+# prioridade, pedido parcial seria incorretamente absorvido por "c/ Pedido"
+# antes de chegar na regra especifica (ver arquivos_originais/
+# melhoria_pedido_parcial_bridge_cd.md, secao 4).
+_BRIDGE_MATCH_PRIORITY: list[str] = [
+    "Situação Crítica – PEDIDO PARCIAL",
+    "Sit. Crítica c/ Pedido",
+    "Sit. Crítica s/ Pedido",
+    "CD Insuficiente",
+    "CD Atende Loja",
+    "Estoque Negativo",
+]
+_BRIDGE_DEFS_BY_LABEL: dict[str, dict] = {d["label"]: d for d in BRIDGE_STATUS_DEFS}
+_BRIDGE_MATCH_DEFS: list[dict] = [_BRIDGE_DEFS_BY_LABEL[label] for label in _BRIDGE_MATCH_PRIORITY]
+
 # Fallback usado apenas quando nao ha itens reais de bridge para o dia (sem
-# ranking possivel) - proporcoes fixas herdadas do dashboard antigo.
-BRIDGE_FALLBACK_PROPORTIONS: list[float] = [0.400, 0.214, 0.102, 0.252, 0.032]
+# ranking possivel) - proporcoes fixas herdadas do dashboard antigo. Pareado
+# por posicao com BRIDGE_STATUS_DEFS (ordem de exibicao); "Situacao Critica -
+# PEDIDO PARCIAL" comeca com proporcao 0 (sem historico ainda para calibrar)
+# ate que o negocio defina um valor - as demais mantem os valores legados.
+BRIDGE_FALLBACK_PROPORTIONS: list[float] = [0.400, 0.214, 0.0, 0.102, 0.252, 0.032]
 
 # Fator aplicado sobre %/valor do segmento para estimar a fatia "critica"
 # (Sit. Critica c/Pedido + Sit. Critica s/Pedido) quando nao ha bridge real
@@ -198,9 +225,12 @@ def segmento_is_over_meta(segmento: str, percentual: float) -> bool:
 
 def match_bridge_status(situacao: str) -> dict | None:
     """Retorna a primeira definicao de status cujas keys casam (substring,
-    case-insensitive) com o texto de SITUACAO, ou None se nada casar."""
+    case-insensitive) com o texto de SITUACAO, ou None se nada casar. Usa
+    _BRIDGE_MATCH_DEFS (ordem de prioridade de casamento), nao
+    BRIDGE_STATUS_DEFS (ordem de exibicao) - ver comentario acima de
+    _BRIDGE_MATCH_PRIORITY."""
     up = (situacao or "").strip().upper()
-    for status_def in BRIDGE_STATUS_DEFS:
+    for status_def in _BRIDGE_MATCH_DEFS:
         if any(key in up for key in status_def["keys"]):
             return status_def
     return None

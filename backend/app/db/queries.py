@@ -97,12 +97,12 @@ LOJAS_BRIDGE = """
       , FACING_LOJAS
       , QTD_ESTOQUE_CD
       , SITUACAO
-    FROM {schema}.VW_DASH_LOJAS_BRIDGE
+    FROM {schema}.DASH_LOJAS_BRIDGE
     WHERE DATA_REFERENCIA = :data_referencia
 """
 
 # Usada so pelo "Item Mais Critico" da Visao Geral: em vez de trazer a
-# VW_DASH_LOJAS_BRIDGE inteira (uma linha por item/loja, pode ser dezenas de
+# DASH_LOJAS_BRIDGE inteira (uma linha por item/loja, pode ser dezenas de
 # milhares de linhas) so para achar o maior valor em Python, deixa o Oracle
 # ordenar e devolver so 1 linha - reduz drasticamente o trafego de rede E o
 # tempo de processamento Python (que prendia o GIL e atrasava outras
@@ -122,7 +122,7 @@ LOJAS_BRIDGE_TOP_CRITICO = """
           , DESCRICAO_PRODUTO
           , RUPTURA_VALOR_VENDA
           , SITUACAO
-        FROM {schema}.VW_DASH_LOJAS_BRIDGE
+        FROM {schema}.DASH_LOJAS_BRIDGE
         WHERE DATA_REFERENCIA = :data_referencia
           AND RUPTURA_VALOR_VENDA > 0
           AND COD_UNIDADE NOT IN ('300', '203')

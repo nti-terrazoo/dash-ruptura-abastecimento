@@ -55,7 +55,7 @@ Todo dado vem de `EPORTAL.VW_DASH_*` (schema configurável via `.env`), acessada
 | `get_dia_a_dia_cd` | `VW_DASH_DIA_A_DIA_CD` | idem, com CD |
 | `get_lojas` | `VW_DASH_LOJAS` | 1 linha por loja no dia |
 | `get_fornecedores` | `VW_DASH_FORNECEDORES` | 1 linha por fornecedor no dia (sem segmento) |
-| `get_lojas_bridge` | `VW_DASH_LOJAS_BRIDGE` | 1 linha por item/produto/loja (a mais granular; tem `SITUACAO`, `FACING`, `QTD_ESTOQUE_CD` etc.) |
+| `get_lojas_bridge` | `DASH_LOJAS_BRIDGE` | 1 linha por item/produto/loja (a mais granular; tem `SITUACAO`, `FACING`, `QTD_ESTOQUE_CD` etc.) |
 | `get_dde_geral` | `VW_DASH_DDE` | 1 linha por dia |
 | `get_dde_fornecedor` | `VW_DASH_DDE_FORNECEDOR` | 1 linha por fornecedor no dia |
 | `get_dde_lojas` | `VW_DASH_DDE_LOJAS` | 1 linha por loja no dia |
@@ -83,7 +83,7 @@ Constantes de código (não vêm de tabela do banco):
 - **`BRIDGE_FALLBACK_PROPORTIONS = [0.400, 0.214, 0.102, 0.252, 0.032]`** — usado só quando não há nenhum item real de bridge no dia/recorte (ver §5).
 - **`CRIT_LEGACY_FACTOR = 0.614`** — soma das duas primeiras proporções de fallback (`0.400+0.214`); usado só em `get_segmento_detail` para estimar `critico_estimado` (ver §7). O próprio comentário no código registra que é um valor herdado sem justificativa de negócio documentada.
 - **`EXCLUDED_STORE_PREFIXES`** — `["TERRAZOO CD", "LYNKZ BR", "RV PRODUÇÃO", "LYNKZ IMPERATRI", "CD "]`. `is_excluded_store(nome)` compara por **prefixo**, case-insensitive — qualquer loja cujo nome comece com um desses é excluída de **toda** listagem/ranking de lojas (é o Centro de Distribuição, produção ou parceiro logístico, não um ponto de venda real).
-- **`EXCLUDED_BRIDGE_UNIDADES = {"300", "203"}`** — códigos de unidade sempre descartados dos itens de bridge (linhas de produto), em qualquer seção que use `VW_DASH_LOJAS_BRIDGE`.
+- **`EXCLUDED_BRIDGE_UNIDADES = {"300", "203"}`** — códigos de unidade sempre descartados dos itens de bridge (linhas de produto), em qualquer seção que use `DASH_LOJAS_BRIDGE`.
 - **`SEGMENTO_COLOR_PALETTE`** — 9 cores (`#5ed9a0, #4cbf8a, #3ca574, #2e8b5e, #7ff5b8, #9aebb2, #c4e8ce, #6bb5ff, #f4a85d`), cicladas por índice em `VALID_SEGMENTOS` (`segmento_color(seg)`). Fallback para índice 0 se o segmento não estiver na lista dos 9 conhecidos.
 - **`loja_status(percentual)`** — 4 faixas: `≤10% → "OK"`, `≤15% → "Atenção"`, `≤25% → "Alerta"`, `>25% → "Crítico"`.
 - **`loja_color(percentual)`** — binário: `≤10% → "#2d6b4a"` (verde), senão `"#e05555"` (vermelho) — note que isso é **mais grosso** que `loja_status` (Atenção/Alerta/Crítico compartilham a mesma cor vermelha).
@@ -284,14 +284,14 @@ O backend **nunca** formata nada para exibição — todo número chega cru (flo
 |---|---|---|
 | `GET /api/dates` | `raw_data.get_available_dates` | `VW_DASH_DIA_A_DIA` |
 | `GET /api/health` | (checagem de conexão) | — |
-| `GET /api/overview` | `get_overview` | `VW_DASH_DDE`, `VW_DASH_DDE_FORNECEDOR`, `VW_DASH_PLANILHA_GRAFICO` (+ `VW_DASH_PLANILHA_GERAL` como fallback por segmento), `VW_DASH_LOJAS_BRIDGE`, `VW_DASH_DIA_A_DIA`, `VW_DASH_DIA_A_DIA_CD` |
+| `GET /api/overview` | `get_overview` | `VW_DASH_DDE`, `VW_DASH_DDE_FORNECEDOR`, `VW_DASH_PLANILHA_GRAFICO` (+ `VW_DASH_PLANILHA_GERAL` como fallback por segmento), `DASH_LOJAS_BRIDGE`, `VW_DASH_DIA_A_DIA`, `VW_DASH_DIA_A_DIA_CD` |
 | `GET /api/overview/series` | `get_series` | `VW_DASH_DIA_A_DIA` ou `VW_DASH_DIA_A_DIA_CD` (intervalo) |
 | `GET /api/lojas` | `get_lojas` | `VW_DASH_LOJAS`, `VW_DASH_DDE_LOJAS` |
-| `GET /api/lojas/{cod}` | `get_loja_detail` | (reusa `get_lojas`) + `VW_DASH_LOJAS_BRIDGE` |
+| `GET /api/lojas/{cod}` | `get_loja_detail` | (reusa `get_lojas`) + `DASH_LOJAS_BRIDGE` |
 | `GET /api/fornecedores` | `get_fornecedores` | `VW_DASH_PLANILHA_GERAL` (+ `VW_DASH_FORNECEDORES` como fallback), `VW_DASH_DDE_FORNECEDOR` |
-| `GET /api/bridge` | `get_bridge` | `VW_DASH_DIA_A_DIA` ou `get_segmentos_today`/`get_lojas` conforme `mode`, + `VW_DASH_LOJAS_BRIDGE` |
-| `GET /api/bridge/drilldown` | `get_bridge_drilldown` | `VW_DASH_LOJAS_BRIDGE` |
-| `GET /api/segmentos/{seg}` | `get_segmento_detail` | `VW_DASH_PLANILHA_GRAFICO`/`GERAL`, `VW_DASH_DDE_SEGMENTO`, `VW_DASH_LOJAS_BRIDGE`, `VW_DASH_PLANILHA_GERAL` (fornecedores 3 dias) |
+| `GET /api/bridge` | `get_bridge` | `VW_DASH_DIA_A_DIA` ou `get_segmentos_today`/`get_lojas` conforme `mode`, + `DASH_LOJAS_BRIDGE` |
+| `GET /api/bridge/drilldown` | `get_bridge_drilldown` | `DASH_LOJAS_BRIDGE` |
+| `GET /api/segmentos/{seg}` | `get_segmento_detail` | `VW_DASH_PLANILHA_GRAFICO`/`GERAL`, `VW_DASH_DDE_SEGMENTO`, `DASH_LOJAS_BRIDGE`, `VW_DASH_PLANILHA_GERAL` (fornecedores 3 dias) |
 | `GET /api/segmentos/{seg}/series` | `get_segmento_series` | `VW_DASH_PLANILHA_GRAFICO`/`_CD` (intervalo), `VW_DASH_DDE_SEGMENTO` (intervalo) |
 
 ---
@@ -304,11 +304,11 @@ O backend **nunca** formata nada para exibição — todo número chega cru (flo
 | Overview · DDE Geral | 1ª linha do dia | `VW_DASH_DDE` |
 | Overview · Top 3 fornecedores por DDE | filtro `0<dde≤400`, top 3 desc | `VW_DASH_DDE_FORNECEDOR` |
 | Overview · Ruptura por Segmento | agregação por segmento + complementação entre views | `VW_DASH_PLANILHA_GRAFICO` + `GERAL` |
-| Overview · Item Mais Crítico | maior valor entre itens válidos (país inteiro) | `VW_DASH_LOJAS_BRIDGE` |
+| Overview · Item Mais Crítico | maior valor entre itens válidos (país inteiro) | `DASH_LOJAS_BRIDGE` |
 | Lojas · tabela/cards | exclusão de CD/produção, status/cor por %, split ≤10/>10 | `VW_DASH_LOJAS` + `VW_DASH_DDE_LOJAS` |
-| Lojas · drawer | itens/segmentos filtrados pela loja | `VW_DASH_LOJAS_BRIDGE` |
+| Lojas · drawer | itens/segmentos filtrados pela loja | `DASH_LOJAS_BRIDGE` |
 | Fornecedores · ranking/destaques | soma de valor + média ponderada de %, ordenado por valor | `VW_DASH_PLANILHA_GERAL` (fallback `VW_DASH_FORNECEDORES`) |
-| Bridge · 5 status + waterfall | proporção interna aplicada sobre o valor/percentual oficial do recorte | `VW_DASH_LOJAS_BRIDGE` + (`DIA_A_DIA`/segmento/loja conforme modo) |
+| Bridge · 5 status + waterfall | proporção interna aplicada sobre o valor/percentual oficial do recorte | `DASH_LOJAS_BRIDGE` + (`DIA_A_DIA`/segmento/loja conforme modo) |
 | Segmentos · header (%, valor, meta, DDE) | mesma agregação por segmento + metas fixas em código | `VW_DASH_PLANILHA_GRAFICO`/`GERAL` + `VW_DASH_DDE_SEGMENTO` |
 | Segmentos · gráfico 3 eixos | série no intervalo (mês/30d/60d) + DDE por data | `VW_DASH_PLANILHA_GRAFICO[_CD]` (intervalo) + `VW_DASH_DDE_SEGMENTO` (intervalo) |
 | Segmentos · Top Fornecedores 3 dias | mesma agregação de Fornecedores, repetida para 3 datas, ranqueado pelo dia mais recente | `VW_DASH_PLANILHA_GERAL` × 3 dias |

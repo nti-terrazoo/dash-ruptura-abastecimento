@@ -87,6 +87,18 @@ def test_match_bridge_status_substring_case_insensitive():
     assert match_bridge_status("") is None
 
 
+def test_match_bridge_status_pedido_parcial_tem_prioridade_sobre_com_pedido():
+    # "Situacao Critica - Pedido Parcial" contem "- Pedido" e tambem seria
+    # capturado pelas keys genericas de "Sit. Critica c/ Pedido" se a ordem de
+    # casamento nao desse prioridade a "Pedido Parcial" (ver
+    # arquivos_originais/melhoria_pedido_parcial_bridge_cd.md, secao 4).
+    assert (
+        match_bridge_status("Situação Crítica - Pedido Parcial")["label"]
+        == "Situação Crítica – PEDIDO PARCIAL"
+    )
+    assert match_bridge_status("SITUACAO CRITICA - PEDIDO PARCIAL")["label"] == "Situação Crítica – PEDIDO PARCIAL"
+
+
 def test_aggregate_bridge_status_totals_ignores_unmatched_and_non_positive():
     itens = [
         {"valor": 100.0, "situacao": "CD Atende Loja"},
@@ -103,7 +115,7 @@ def test_aggregate_bridge_status_totals_ignores_unmatched_and_non_positive():
 
 def test_split_bridge_by_official_total_fallback_when_no_real_items():
     statuses = split_bridge_by_official_total({}, official_valor=1000.0, official_pct=10.0)
-    assert len(statuses) == 5
+    assert len(statuses) == 6
     total_valor = sum(s["valor"] for s in statuses)
     total_pp = sum(s["pp"] for s in statuses)
     assert total_valor == pytest.approx(1000.0)

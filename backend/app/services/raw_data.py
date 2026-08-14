@@ -25,7 +25,7 @@ def _rows_as_dicts(cursor) -> list[dict]:
 
 
 # Default do driver e arraysize=100/prefetchrows=2 - para views com muitas
-# linhas (ex. VW_DASH_LOJAS_BRIDGE, uma linha por item/loja) isso significa
+# linhas (ex. DASH_LOJAS_BRIDGE, uma linha por item/loja) isso significa
 # dezenas ou centenas de round-trips ao Oracle so para buscar um resultado
 # que caberia em poucos. Aumentar os dois reduz drasticamente o numero de
 # round-trips numa rede com latencia (o cenario deste projeto, Oracle

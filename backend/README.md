@@ -129,7 +129,7 @@ disponivel):
   Bridge geral, Ruptura Segmentos para os 9 segmentos) para a data mais
   recente. Sem isso, a primeira pessoa a abrir o dashboard de manha pagaria
   o custo da consulta mais lenta do sistema (a bridge geral, que varre a
-  `VW_DASH_LOJAS_BRIDGE` inteira e pode levar dezenas de segundos com cache
+  `DASH_LOJAS_BRIDGE` inteira e pode levar dezenas de segundos com cache
   frio). Pode ser disparado manualmente (ex: logo apos um deploy) com:
   ```bash
   curl -X POST http://localhost:8000/api/admin/warm-cache
