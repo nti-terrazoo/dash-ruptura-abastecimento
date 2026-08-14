@@ -700,12 +700,10 @@ export async function gerarComitePptx(data: ComiteResponse): Promise<void> {
   slideEvolucao(pres, data, dataFmt);
   slideBridgeGeral(pres, data, dataFmt);
 
-  const top4 = [...data.segmentos]
+  const segmentosPorDelta = [...data.segmentos]
     .map((s) => ({ s, delta: s.percentual - (s.meta ?? 10) }))
-    .filter((x) => x.delta > 0)
-    .sort((a, b) => b.delta - a.delta)
-    .slice(0, 4);
-  top4.forEach(({ s }) => slideSegmentoBridge(pres, s, dataFmt));
+    .sort((a, b) => b.delta - a.delta);
+  segmentosPorDelta.forEach(({ s }) => slideSegmentoBridge(pres, s, dataFmt));
 
   slideRankingLojas(pres, data, dataFmt);
   slideLojaCritica(pres, data, dataFmt);
