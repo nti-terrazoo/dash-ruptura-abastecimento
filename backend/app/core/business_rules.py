@@ -94,7 +94,7 @@ BRIDGE_STATUS_DEFS: list[dict] = [
         "color": "#ff9999",
     },
     {
-        "label": "Situação Crítica – PEDIDO PARCIAL",
+        "label": "Sit. Crítica p/ Pedido",
         "keys": ["SITUAÇÃO CRÍTICA - PEDIDO PARCIAL", "SITUACAO CRITICA - PEDIDO PARCIAL", "PEDIDO PARCIAL"],
         "color": "#a15fd6",
     },
@@ -124,7 +124,7 @@ BRIDGE_STATUS_DEFS: list[dict] = [
 # antes de chegar na regra especifica (ver arquivos_originais/
 # melhoria_pedido_parcial_bridge_cd.md, secao 4).
 _BRIDGE_MATCH_PRIORITY: list[str] = [
-    "Situação Crítica – PEDIDO PARCIAL",
+    "Sit. Crítica p/ Pedido",
     "Sit. Crítica c/ Pedido",
     "Sit. Crítica s/ Pedido",
     "CD Insuficiente",
@@ -136,8 +136,8 @@ _BRIDGE_MATCH_DEFS: list[dict] = [_BRIDGE_DEFS_BY_LABEL[label] for label in _BRI
 
 # Fallback usado apenas quando nao ha itens reais de bridge para o dia (sem
 # ranking possivel) - proporcoes fixas herdadas do dashboard antigo. Pareado
-# por posicao com BRIDGE_STATUS_DEFS (ordem de exibicao); "Situacao Critica -
-# PEDIDO PARCIAL" comeca com proporcao 0 (sem historico ainda para calibrar)
+# por posicao com BRIDGE_STATUS_DEFS (ordem de exibicao); "Sit. Critica p/
+# Pedido" comeca com proporcao 0 (sem historico ainda para calibrar)
 # ate que o negocio defina um valor - as demais mantem os valores legados.
 BRIDGE_FALLBACK_PROPORTIONS: list[float] = [0.400, 0.214, 0.0, 0.102, 0.252, 0.032]
 

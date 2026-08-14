@@ -94,9 +94,9 @@ def test_match_bridge_status_pedido_parcial_tem_prioridade_sobre_com_pedido():
     # arquivos_originais/melhoria_pedido_parcial_bridge_cd.md, secao 4).
     assert (
         match_bridge_status("Situação Crítica - Pedido Parcial")["label"]
-        == "Situação Crítica – PEDIDO PARCIAL"
+        == "Sit. Crítica p/ Pedido"
     )
-    assert match_bridge_status("SITUACAO CRITICA - PEDIDO PARCIAL")["label"] == "Situação Crítica – PEDIDO PARCIAL"
+    assert match_bridge_status("SITUACAO CRITICA - PEDIDO PARCIAL")["label"] == "Sit. Crítica p/ Pedido"
 
 
 def test_aggregate_bridge_status_totals_ignores_unmatched_and_non_positive():
