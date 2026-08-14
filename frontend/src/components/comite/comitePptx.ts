@@ -27,6 +27,48 @@ const CV = {
 const CURVAS = ["A", "B", "C", "D"] as const;
 const COR_CURVA: Record<string, string> = { A: "1565C0", B: "2E7D32", C: "E65100", D: "AD1457" };
 
+const MESES_ABREV = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
+interface SemanaAgregada {
+  label: string;
+  pct: number;
+  pp: number | null;
+  valor: number | null;
+}
+
+/** Rotula a semana-do-mes de uma data ISO ("YYYY-MM-DD") no formato "Sem N - Mon/AAAA".
+ * Semana = ceil(dia/7), ou seja dias 1-7 = Sem 1, 8-14 = Sem 2, etc. Parse manual
+ * (sem `new Date()`) pelo mesmo motivo de formatDateFull/formatDateShort em lib/format.ts. */
+function semanaLabel(iso: string): string {
+  const [year, month, day] = iso.split("-").map(Number);
+  const semana = Math.ceil(day / 7);
+  return `Sem ${semana} - ${MESES_ABREV[month - 1]}/${year}`;
+}
+
+/** Agrupa pontos diarios em medias semanais, preservando a ordem cronologica
+ * (os pontos ja chegam ordenados por data). pp/valor ficam null quando nenhum
+ * ponto da semana os possui. */
+function agruparPorSemana(pontos: ComiteCurvaPonto[]): SemanaAgregada[] {
+  const grupos = new Map<string, ComiteCurvaPonto[]>();
+  pontos.forEach((p) => {
+    const label = semanaLabel(p.data);
+    const grupo = grupos.get(label);
+    if (grupo) grupo.push(p);
+    else grupos.set(label, [p]);
+  });
+  const media = (vals: number[]) => vals.reduce((a, b) => a + b, 0) / vals.length;
+  return Array.from(grupos.entries()).map(([label, itens]) => {
+    const pps = itens.map((p) => p.pp).filter((v): v is number => v != null);
+    const valores = itens.map((p) => p.valor).filter((v): v is number => v != null);
+    return {
+      label,
+      pct: media(itens.map((p) => p.pct)),
+      pp: pps.length ? media(pps) : null,
+      valor: valores.length ? media(valores) : null,
+    };
+  });
+}
+
 function fv(v: number): string {
   const abs = Math.abs(v);
   if (abs >= 1e6) return `R$ ${(v / 1e6).toFixed(2)}M`;
@@ -514,21 +556,21 @@ function slideCurvasResumo(pres: PptxGenJS, data: ComiteResponse, dataFmt: strin
 function slideCurvaPercentual(pres: PptxGenJS, data: ComiteResponse, curva: (typeof CURVAS)[number], dataFmt: string) {
   const sl = pres.addSlide();
   sl.background = { color: CV.bg };
-  hdr(sl, `Ruptura Específica — Curva ${curva}`, `Histórico completo  |  ${dataFmt}`);
-  const pontos = data.curvas.pontos[curva];
+  hdr(sl, `Ruptura Específica — Curva ${curva}`, `Média semanal  |  ${dataFmt}`);
+  const semanas = agruparPorSemana(data.curvas.pontos[curva]);
   const cor = COR_CURVA[curva];
-  if (pontos.length > 1) {
-    const labels = pontos.map((p) => p.data);
-    sl.addChart("line", [{ name: `Curva ${curva} — Rupt. Específica (%)`, labels, values: pontos.map((p) => +p.pct.toFixed(2)) }], {
+  if (semanas.length > 1) {
+    const labels = semanas.map((s) => s.label);
+    sl.addChart("line", [{ name: `Curva ${curva} — Rupt. Específica (%)`, labels, values: semanas.map((s) => +s.pct.toFixed(2)) }], {
       x: 0.3, y: 0.82, w: 12.7, h: 2.9, chartColors: [cor], lineSize: 2.5,
       chartArea: { fill: { color: CV.bgCard }, roundedCorners: true },
       catAxisLabelColor: CV.muted, valAxisLabelColor: CV.muted,
       valGridLine: { color: "e0e8e0", size: 0.5 }, catGridLine: { style: "none" },
-      showLegend: true, legendPos: "t", legendFontSize: 10, showValue: true, dataLabelFontSize: 8, dataLabelColor: cor,
+      showLegend: true, legendPos: "t", legendFontSize: 10, showValue: true, dataLabelFontSize: 8, dataLabelColor: CV.texto, dataLabelFontBold: true, dataLabelPosition: "t",
     });
-    const comValor = pontos.filter((p) => p.valor != null);
+    const comValor = semanas.filter((s) => s.valor != null);
     if (comValor.length > 1) {
-      sl.addChart("bar", [{ name: `Curva ${curva} — Valor R$`, labels: comValor.map((p) => p.data), values: comValor.map((p) => +(p.valor ?? 0).toFixed(0)) }], {
+      sl.addChart("bar", [{ name: `Curva ${curva} — Valor R$`, labels: comValor.map((s) => s.label), values: comValor.map((s) => +(s.valor ?? 0).toFixed(0)) }], {
         x: 0.3, y: 3.85, w: 12.7, h: 3.1, barDir: "col", chartColors: [cor],
         chartArea: { fill: { color: CV.bgCard }, roundedCorners: true },
         catAxisLabelColor: CV.muted, valAxisLabelColor: CV.muted,
@@ -545,19 +587,19 @@ function slideCurvaPercentual(pres: PptxGenJS, data: ComiteResponse, curva: (typ
 function slideCurvaPP(pres: PptxGenJS, data: ComiteResponse, curva: (typeof CURVAS)[number], dataFmt: string) {
   const sl = pres.addSlide();
   sl.background = { color: CV.bg };
-  hdr(sl, `Ruptura em Pontos Percentuais — Curva ${curva}`, `Histórico completo  |  ${dataFmt}`);
-  const pontos = data.curvas.pontos[curva].filter((p) => p.pp != null);
+  hdr(sl, `Ruptura em Pontos Percentuais — Curva ${curva}`, `Média semanal  |  ${dataFmt}`);
+  const semanas = agruparPorSemana(data.curvas.pontos[curva].filter((p) => p.pp != null));
   const cor = COR_CURVA[curva];
-  if (pontos.length > 1) {
-    const labels = pontos.map((p) => p.data);
-    sl.addChart("line", [{ name: `Curva ${curva} — PP (%)`, labels, values: pontos.map((p) => +(p.pp ?? 0).toFixed(2)) }], {
+  if (semanas.length > 1) {
+    const labels = semanas.map((s) => s.label);
+    sl.addChart("line", [{ name: `Curva ${curva} — PP (%)`, labels, values: semanas.map((s) => +(s.pp ?? 0).toFixed(2)) }], {
       x: 0.3, y: 0.82, w: 12.7, h: 2.9, chartColors: [cor], lineSize: 2.5,
       chartArea: { fill: { color: CV.bgCard }, roundedCorners: true },
       catAxisLabelColor: CV.muted, valAxisLabelColor: CV.muted,
       valGridLine: { color: "e0e8e0", size: 0.5 }, catGridLine: { style: "none" },
-      showLegend: true, legendPos: "t", legendFontSize: 10, showValue: true, dataLabelFontSize: 8, dataLabelColor: cor,
+      showLegend: true, legendPos: "t", legendFontSize: 10, showValue: true, dataLabelFontSize: 8, dataLabelColor: CV.texto, dataLabelFontBold: true, dataLabelPosition: "t",
     });
-    sl.addChart("bar", [{ name: `Curva ${curva} — Valor R$`, labels, values: pontos.map((p) => +(p.valor ?? 0).toFixed(0)) }], {
+    sl.addChart("bar", [{ name: `Curva ${curva} — Valor R$`, labels, values: semanas.map((s) => +(s.valor ?? 0).toFixed(0)) }], {
       x: 0.3, y: 3.85, w: 12.7, h: 3.1, barDir: "col", chartColors: [cor],
       chartArea: { fill: { color: CV.bgCard }, roundedCorners: true },
       catAxisLabelColor: CV.muted, valAxisLabelColor: CV.muted,
