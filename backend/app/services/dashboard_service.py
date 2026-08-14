@@ -538,8 +538,8 @@ CURVAS_ABC_HISTORY_DIAS = 60
 
 def get_curvas_abc(data_referencia: datetime.date, dias: int = CURVAS_ABC_HISTORY_DIAS) -> dict:
     """Ruptura por curva ABC (A/B/C/D) agregada por dia. Fonte: queries 13
-    (VW_DASH_ARQ_01_CURCA, ja agregada por curva no proprio Oracle via
-    queries.CURVAS_ABC_AGREGADO_RANGE) e 14 (VW_DASH_ARQ_02_CURCA, ruptura
+    (VW_DASH_ARQ_01_CURVA, ja agregada por curva no proprio Oracle via
+    queries.CURVAS_ABC_AGREGADO_RANGE) e 14 (VW_DASH_ARQ_02_CURVA, ruptura
     geral do dia usada para repartir "pp"/"valor" proporcionalmente entre as
     curvas - equivalente ao _raw10/av_ do dash_2.html). Substitui o upload
     manual de planilhas do Comite legado por consulta direta ao banco.
@@ -555,9 +555,14 @@ def get_curvas_abc(data_referencia: datetime.date, dias: int = CURVAS_ABC_HISTOR
         curva = (row.get("classificacao") or "D").strip().upper()
         if curva not in CURVAS:
             curva = "D"
-        entry = por_data.setdefault(data, {c: {"ruptura": 0.0, "potencial": 0.0} for c in CURVAS})
+        entry = por_data.setdefault(
+            data,
+            {c: {"ruptura": 0.0, "potencial": 0.0, "qtd_skus": 0, "qtd_skus_ruptura": 0} for c in CURVAS},
+        )
         entry[curva]["ruptura"] += row.get("ruptura_valor_venda") or 0.0
         entry[curva]["potencial"] += row.get("potencial") or 0.0
+        entry[curva]["qtd_skus"] += row.get("qtd_skus") or 0
+        entry[curva]["qtd_skus_ruptura"] += row.get("qtd_skus_ruptura") or 0
 
     aux_by_data = {
         row["data_referencia"]: {
@@ -580,7 +585,14 @@ def get_curvas_abc(data_referencia: datetime.date, dias: int = CURVAS_ABC_HISTOR
                 share = (g["ruptura"] / ruptura_total) if ruptura_total > 0 else 0.0
                 pp = round(aux["percentual"] * share, 2)
                 valor = round(aux["valor"] * share, 2)
-            pontos[c].append({"data": data, "pct": round(pct, 4), "pp": pp, "valor": valor})
+            pontos[c].append({
+                "data": data,
+                "pct": round(pct, 4),
+                "pp": pp,
+                "valor": valor,
+                "qtd_skus": g["qtd_skus"],
+                "qtd_skus_ruptura": g["qtd_skus_ruptura"],
+            })
 
     disponivel = any(pontos[c] for c in CURVAS)
     return {"disponivel": disponivel, "pontos": pontos}

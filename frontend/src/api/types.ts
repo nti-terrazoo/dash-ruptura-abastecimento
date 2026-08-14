@@ -229,6 +229,8 @@ export interface ComiteCurvaPonto {
   pct: number;
   pp: number | null;
   valor: number | null;
+  qtd_skus: number;
+  qtd_skus_ruptura: number;
 }
 
 export interface ComiteCurvas {

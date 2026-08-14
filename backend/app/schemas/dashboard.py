@@ -251,6 +251,8 @@ class ComiteCurvaPonto(BaseModel):
     pct: float
     pp: float | None
     valor: float | None
+    qtd_skus: int
+    qtd_skus_ruptura: int
 
 
 class ComiteCurvas(BaseModel):

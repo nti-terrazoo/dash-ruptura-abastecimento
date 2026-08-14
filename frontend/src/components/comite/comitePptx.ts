@@ -473,7 +473,7 @@ function slideCurvasResumo(pres: PptxGenJS, data: ComiteResponse, dataFmt: strin
     const cor = COR_CURVA[c];
     const x = 0.3 + i * 3.2;
     const ultimo = lastByC[c];
-    sl.addShape("roundRect", { x, y: 0.85, w: 3.1, h: 2.5, fill: { color: CV.bgCard }, line: { color: cor, width: 2 }, rectRadius: 0.1, shadow: shadow() });
+    sl.addShape("roundRect", { x, y: 0.85, w: 3.1, h: 2.85, fill: { color: CV.bgCard }, line: { color: cor, width: 2 }, rectRadius: 0.1, shadow: shadow() });
     sl.addShape("roundRect", { x, y: 0.85, w: 3.1, h: 0.5, fill: { color: cor }, line: { color: cor }, rectRadius: 0.1 });
     sl.addShape("rect", { x, y: 1.1, w: 3.1, h: 0.25, fill: { color: cor }, line: { color: cor } });
     sl.addText(`Curva ${c}`, { x: x + 0.1, y: 0.88, w: 2.9, h: 0.42, fontSize: 16, bold: true, color: CV.branco, fontFace: "Cambria", align: "center", margin: 0 });
@@ -481,10 +481,19 @@ function slideCurvasResumo(pres: PptxGenJS, data: ComiteResponse, dataFmt: strin
     sl.addText(`${(ultimo?.pct ?? 0).toFixed(2)}%`, { x: x + 0.1, y: 1.68, w: 2.9, h: 0.55, fontSize: 22, bold: true, color: cor, fontFace: "Calibri", align: "center", margin: 0 });
     sl.addText("Ruptura em PP", { x: x + 0.1, y: 2.3, w: 2.9, h: 0.22, fontSize: 9, color: CV.muted, fontFace: "Calibri", align: "center", margin: 0 });
     sl.addText(`${(ultimo?.pp ?? 0).toFixed(2)}pp`, { x: x + 0.1, y: 2.52, w: 2.9, h: 0.55, fontSize: 18, bold: true, color: cor, fontFace: "Calibri", align: "center", margin: 0 });
+    sl.addText(
+      [
+        { text: `${ultimo?.qtd_skus ?? 0}`, options: { color: cor, bold: true } },
+        { text: " SKUs  •  ", options: { color: CV.muted } },
+        { text: `${ultimo?.qtd_skus_ruptura ?? 0}`, options: { color: cor, bold: true } },
+        { text: " em ruptura", options: { color: CV.muted } },
+      ],
+      { x: x + 0.1, y: 3.08, w: 2.9, h: 0.25, fontSize: 8.5, fontFace: "Calibri", align: "center", margin: 0 },
+    );
   });
 
   const hist10 = data.curvas.pontos.A.slice(-10).map((p) => p.data);
-  sl.addText("Histórico — Ruptura Específica por Curva (últimos 10 registros)", { x: 0.3, y: 3.55, w: 12.7, h: 0.28, fontSize: 10, bold: true, color: CV.verdeEsc, fontFace: "Calibri", margin: 0 });
+  sl.addText("Histórico — Ruptura Específica por Curva (últimos 10 registros)", { x: 0.3, y: 3.9, w: 12.7, h: 0.28, fontSize: 10, bold: true, color: CV.verdeEsc, fontFace: "Calibri", margin: 0 });
   const hdrRow = tableHeaderRow([{ text: "Data" }, ...CURVAS.map((c) => ({ text: `Curva ${c}`, align: "center" as const }))]);
   const dataRows = hist10.map((data_, i) =>
     tableRow(
@@ -498,7 +507,7 @@ function slideCurvasResumo(pres: PptxGenJS, data: ComiteResponse, dataFmt: strin
       i,
     ),
   );
-  sl.addTable([hdrRow, ...dataRows], { x: 0.3, y: 3.87, w: 12.7, h: 3.0, colW: [2.2, 2.6, 2.6, 2.6, 2.7], border: { pt: 0.5, color: "ddeedd" }, fontSize: 9, fontFace: "Calibri" });
+  sl.addTable([hdrRow, ...dataRows], { x: 0.3, y: 4.22, w: 12.7, h: 2.65, colW: [2.2, 2.6, 2.6, 2.6, 2.7], border: { pt: 0.5, color: "ddeedd" }, fontSize: 9, fontFace: "Calibri" });
   ftr(sl, dataFmt);
 }
 
