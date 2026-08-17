@@ -12,6 +12,7 @@ from app.config import get_settings
 from app.db.oracle import OracleUnavailableError, close_pool, init_pool
 from app.jobs.cache_warmup import warm_cache
 from app.routers import admin, briefing, bridge, comite, dates, fornecedores, health, lojas, overview, segmentos
+from app.jobs.daily_email import generate_and_send_email
 
 logging.basicConfig(level=logging.INFO)
 
@@ -24,13 +25,23 @@ async def lifespan(app: FastAPI):
     settings = get_settings()
     scheduler.add_job(
         warm_cache,
-        CronTrigger(hour=settings.cache_warmup_hour, minute=settings.cache_warmup_minute),
+        CronTrigger(hour=settings.cache_warmup_hour, minute=settings.cache_warmup_minute, timezone="America/Sao_Paulo"),
         id="cache_warmup",
         replace_existing=True,
         # Se o servidor estiver fora do ar no horario exato (deploy, restart),
         # ainda roda o warm-up ao voltar em vez de pular o dia inteiro.
         misfire_grace_time=3600,
     )
+
+    #agendamento do envio de e-mail diário às 08:00
+    scheduler.add_job(
+        generate_and_send_email,
+        CronTrigger(hour=8, minute=00, timezone="America/Sao_Paulo"),
+        id="daily_email_report",
+        replace_existing=True,
+        misfire_grace_time=3600,
+    )
+
     scheduler.start()
     yield
     scheduler.shutdown(wait=False)

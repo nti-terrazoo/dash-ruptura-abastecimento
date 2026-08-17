@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     oracle_pool_max: int = 10
     oracle_pool_increment: int = 1
     oracle_schema: str = "EPORTAL"
+    email_user: str = ""
+    email_password: str = ""
 
     # Os dados de uma DATA_REFERENCIA especifica nao mudam depois de calculados
     # pelo ETL do Oracle (ver README) - 24h e seguro e evita reconsultar o

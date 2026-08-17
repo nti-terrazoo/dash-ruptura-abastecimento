@@ -1,6 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, BackgroundTasks
 
 from app.jobs.cache_warmup import warm_cache
+from app.jobs.daily_email import generate_and_send_email
 
 router = APIRouter(tags=["admin"])
 
@@ -15,3 +16,9 @@ def trigger_warm_cache():
     termina."""
     warm_cache()
     return {"status": "ok"}
+
+@router.post("/admin/testar-email")
+def testar_envio_email(background_tasks: BackgroundTasks):
+    # Envia para rodar em background para não travar a sua requisição
+    background_tasks.add_task(generate_and_send_email)
+    return {"message": "Rotina de e-mail iniciada em background! Verifique os logs."}
