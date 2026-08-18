@@ -96,7 +96,8 @@ def generate_and_send_email():
             filename='relatorio_ruptura_bridge.xlsx'
         )
         
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+        with smtplib.SMTP('smtp.claramail.com.br', 587) as smtp:
+            smtp.starttls() 
             smtp.login(settings.email_user, settings.email_password)
             smtp.send_message(msg)
             
