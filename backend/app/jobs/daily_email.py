@@ -80,7 +80,7 @@ def generate_and_send_email():
         msg = EmailMessage()
         msg['Subject'] = 'Relatório Diário de Ruptura do Abastecimento'
         msg['From'] = settings.email_user
-        msg['To'] = 'abastecimento@terrazoo.com.br, compras@terrazoo.com.br, ti@terrazoo.com.br' # 'abastecimento@terrazoo.com.br, compras@terrazoo.com.br'
+        msg['To'] = 'abastecimento@terrazoo.com.br, compras@terrazoo.com.br' # 'abastecimento@terrazoo.com.br, compras@terrazoo.com.br'
         
         msg.set_content(
             "Bom dia,\n\n"
