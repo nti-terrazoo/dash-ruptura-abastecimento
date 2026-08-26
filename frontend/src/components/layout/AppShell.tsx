@@ -1,5 +1,6 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { useSidebarCollapsed } from "../../hooks/useSidebarCollapsed";
+import { CriteriosFab } from "./CriteriosFab";
 import { Sidebar } from "./Sidebar";
 import styles from "./AppShell.module.css";
 
@@ -15,6 +16,7 @@ export function AppShell() {
           <Outlet />
         </main>
       </div>
+      <CriteriosFab />
     </>
   );
 }
