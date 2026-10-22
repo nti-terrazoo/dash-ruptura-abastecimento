@@ -115,6 +115,12 @@ def get_dde_segmento(data_referencia: datetime.date) -> list[dict]:
     return _fetch_for_date("dde_segmento", queries.DDE_SEGMENTO, data_referencia)
 
 
+def get_metas_segmento() -> list[dict]:
+    """Cadastro de metas - usa o cache de TTL curto (o mesmo das datas
+    disponiveis) para refletir alteracoes na tabela sem reiniciar o app."""
+    return cached_dates(("metas_segmento",), lambda: _run(queries.METAS_SEGMENTO, {}))
+
+
 def get_available_dates(months: int = 1) -> list[datetime.date]:
     def loader():
         rows = _run(queries.AVAILABLE_DATES, {"months": months})

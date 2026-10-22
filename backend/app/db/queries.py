@@ -167,6 +167,17 @@ DDE_SEGMENTO = """
     WHERE DATA_REFERENCIA = :data_referencia
 """
 
+# Meta de DDE (dias) por segmento, uma coluna por mes (JAN_01..DEZ_12).
+# Tabela de cadastro: uma linha por segmento/ano.
+METAS_SEGMENTO = """
+    SELECT
+      SEGMENTO
+      , ANO
+      , JAN_01, FEV_02, MAR_03, ABR_04, MAI_05, JUN_06
+      , JUL_07, AGO_08, SET_09, OUT_10, NOV_11, DEZ_12
+    FROM {schema}.DASH_METAS_SEGMENTO
+"""
+
 # Usada por /api/dates. VW_DASH_DIA_A_DIA tem uma linha por data de
 # referencia, entao serve como fonte confiavel das datas disponiveis.
 # Traz so os dias com dados no ultimo mes, contando a partir do registro

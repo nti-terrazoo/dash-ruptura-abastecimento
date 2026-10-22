@@ -36,24 +36,35 @@ def test_normalize_percentual_treats_fraction_as_percent():
     assert normalize_percentual(None) == 0.0
 
 
+_META_ROW = {
+    "segmento": "PET FARMACIA",
+    "jan_01": None, "fev_02": 0, "mar_03": 118, "abr_04": 117, "mai_05": 115, "jun_06": 113,
+    "jul_07": 111, "ago_08": 110, "set_09": 108, "out_10": 108, "nov_11": 0, "dez_12": 108,
+}
+
+
 @pytest.mark.parametrize(
     "mes,esperado",
     [
-        (1, 118),  # antes de marco -> clamp no primeiro valor
-        (2, 118),
-        (3, 118),  # marco -> indice 0
-        (4, 117),  # abril -> indice 1
-        (12, 108),  # dezembro -> indice 9 (ultimo)
+        (1, 118),  # janeiro nulo -> usa marco
+        (2, 118),  # fevereiro 0 -> usa marco
+        (3, 118),
+        (4, 117),
+        (11, None),  # mes sem meta (0) fora de jan/fev -> sem meta
         (12, 108),
     ],
 )
-def test_get_dde_meta_clamps_outside_range(mes, esperado):
-    referencia = datetime.date(2026, mes, 15)
-    assert get_dde_meta("PET FARMACIA", referencia) == esperado
+def test_get_dde_meta_por_mes(mes, esperado):
+    assert get_dde_meta(_META_ROW, datetime.date(2026, mes, 15)) == esperado
 
 
-def test_get_dde_meta_unknown_segment_returns_none():
-    assert get_dde_meta("SEGMENTO_INEXISTENTE", datetime.date(2026, 7, 6)) is None
+def test_get_dde_meta_janeiro_com_valor_proprio():
+    row = {**_META_ROW, "jan_01": 120}
+    assert get_dde_meta(row, datetime.date(2026, 1, 15)) == 120
+
+
+def test_get_dde_meta_sem_linha_do_segmento_returns_none():
+    assert get_dde_meta(None, datetime.date(2026, 7, 6)) is None
 
 
 @pytest.mark.parametrize(
@@ -145,3 +156,15 @@ def test_split_bridge_by_official_total_real_data_last_status_closes_remainder()
 
     # primeiro status = 300/500 = 60% do oficial
     assert statuses[0]["valor"] == pytest.approx(987.65 * 0.6, abs=0.01)
+
+
+def test_dde_meta_do_service_exige_linha_do_ano_da_referencia():
+    from unittest.mock import patch
+
+    from app.services import dashboard_service
+
+    rows = [{**_META_ROW, "ano": 2025, "out_10": 200}, {**_META_ROW, "ano": 2026}]
+    with patch("app.services.raw_data.get_metas_segmento", return_value=rows):
+        assert dashboard_service._get_dde_meta("PET FARMACIA", datetime.date(2026, 10, 1)) == 108
+        assert dashboard_service._get_dde_meta("PET FARMACIA", datetime.date(2025, 10, 1)) == 200
+        assert dashboard_service._get_dde_meta("PET FARMACIA", datetime.date(2027, 10, 1)) is None

@@ -103,7 +103,9 @@ def test_get_comite_agrega_9_segmentos_e_escolhe_loja_critica():
         "app.services.raw_data.get_dde_segmento", return_value=[]
     ), patch("app.services.raw_data.get_dde_geral_range", return_value=[]), patch(
         "app.services.raw_data.get_dde_segmento_range", return_value=[]
-    ), patch("app.services.raw_data.get_dde_fornecedor", return_value=[]):
+    ), patch("app.services.raw_data.get_dde_fornecedor", return_value=[]), patch(
+        "app.services.raw_data.get_metas_segmento", return_value=[]
+    ):
         result = get_comite(DATA_REF)
 
     assert len(result["segmentos"]) == 9
@@ -142,7 +144,9 @@ def test_get_comite_loja_critica_cai_para_primeira_loja_quando_ninguem_acima_da_
         "app.services.raw_data.get_dde_segmento", return_value=[]
     ), patch("app.services.raw_data.get_dde_geral_range", return_value=[]), patch(
         "app.services.raw_data.get_dde_segmento_range", return_value=[]
-    ), patch("app.services.raw_data.get_dde_fornecedor", return_value=[]):
+    ), patch("app.services.raw_data.get_dde_fornecedor", return_value=[]), patch(
+        "app.services.raw_data.get_metas_segmento", return_value=[]
+    ):
         result = get_comite(DATA_REF)
 
     assert result["loja_critica"]["cod_unidade"] == "2"

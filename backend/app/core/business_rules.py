@@ -48,34 +48,25 @@ SEG_ALIAS: dict[str, str] = {
     "LAZER": "LAZER",
 }
 
-# Meta mensal de DDE (dias de estoque) por segmento - "Proposta DDE 180+".
-# Indice 0 = marco/2026 ... indice 9 = dezembro/2026 (10 meses).
-DDE_META_SEG: dict[str, list[int]] = {
-    "PET FARMACIA": [118, 117, 115, 113, 111, 110, 108, 108, 108, 108],
-    "PET FOOD": [62, 61, 61, 60, 59, 59, 58, 58, 58, 58],
-    "JARDINAGEM": [131, 128, 124, 121, 117, 113, 110, 110, 110, 110],
-    "AGROPECUARIA": [105, 102, 99, 96, 93, 90, 87, 87, 87, 87],
-    "PET ACESSORIOS": [381, 366, 351, 336, 321, 306, 291, 291, 291, 291],
-    "PET HIGIENE E BELEZA": [88, 86, 85, 84, 82, 81, 80, 80, 80, 80],
-    "PET FAUNA": [95, 93, 91, 88, 86, 84, 82, 82, 82, 82],
-    "PET AQUARISMO": [168, 163, 158, 152, 147, 142, 136, 136, 136, 136],
-    "LAZER": [85, 83, 82, 80, 79, 77, 76, 76, 76, 76],
-}
-DDE_META_SEG_FIRST_MONTH = 3  # marco
+# Colunas mensais de EPORTAL.DASH_METAS_SEGMENTO (meta de DDE em dias por
+# segmento), indexadas por mes - 1.
+DDE_META_COLUNAS_MES: tuple[str, ...] = (
+    "jan_01", "fev_02", "mar_03", "abr_04", "mai_05", "jun_06",
+    "jul_07", "ago_08", "set_09", "out_10", "nov_11", "dez_12",
+)
 
 
-def get_dde_meta(segmento: str, referencia: date) -> float | None:
-    """Meta de DDE do segmento no mes da data de referencia, com clamp para
-    fora do intervalo mar-dez (usa o primeiro/ultimo valor da serie)."""
-    metas = DDE_META_SEG.get(segmento)
-    if not metas:
+def get_dde_meta(meta_row: dict | None, referencia: date) -> float | None:
+    """Meta de DDE do mes da data de referencia, a partir da linha do
+    segmento em DASH_METAS_SEGMENTO. Janeiro/fevereiro sem valor (nulo ou 0)
+    caem na meta de marco. Mes sem meta (nulo ou 0) devolve None."""
+    if not meta_row:
         return None
     mes = referencia.month
-    if mes < DDE_META_SEG_FIRST_MONTH:
-        return metas[0]
-    if mes > DDE_META_SEG_FIRST_MONTH + len(metas) - 1:
-        return metas[-1]
-    return metas[mes - DDE_META_SEG_FIRST_MONTH]
+    valor = meta_row.get(DDE_META_COLUNAS_MES[mes - 1])
+    if not valor and mes < 3:
+        valor = meta_row.get("mar_03")
+    return valor or None
 
 
 # Definicao dos 6 status da "bridge" (waterfall Meta -> Ruptura Atual).

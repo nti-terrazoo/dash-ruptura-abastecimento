@@ -71,6 +71,20 @@ def _pick_item_critico(rows: list[dict]) -> dict | None:
     return _map_bridge_item(top)
 
 
+def _get_dde_meta(seg: str, data_referencia: datetime.date) -> float | None:
+    # So vale a meta cadastrada para o ano da data de referencia - sem linha
+    # do ano, o segmento fica sem meta.
+    meta_row = next(
+        (
+            r
+            for r in raw_data.get_metas_segmento()
+            if norm_seg(r.get("segmento")) == seg and r.get("ano") == data_referencia.year
+        ),
+        None,
+    )
+    return get_dde_meta(meta_row, data_referencia)
+
+
 def get_segmentos_today(data_referencia: datetime.date) -> dict[str, dict]:
     """Percentual/valor de ruptura por segmento no dia. Fonte primaria:
     VW_DASH_PLANILHA_GRAFICO (ja vem por segmento). Complementa com
@@ -516,7 +530,7 @@ def get_segmento_detail(data_referencia: datetime.date, segmento: str) -> dict:
         "meta_percentual": meta,
         "acima_meta": acima,
         "dde": dde_row.get("dias_estoque") if dde_row else None,
-        "dde_meta": get_dde_meta(seg, data_referencia),
+        "dde_meta": _get_dde_meta(seg, data_referencia),
         "cor": "#e05555" if acima else segmento_color(seg),
         "bridge": bridge_resp["statuses"],
         "critico_estimado": {
@@ -635,7 +649,7 @@ def _comite_segmento(
         "percentual_cd": vals_cd["percentual"],
         "valor_cd": vals_cd["valor"],
         "dde": dde_row.get("dias_estoque") if dde_row else None,
-        "dde_meta": get_dde_meta(seg, data_referencia),
+        "dde_meta": _get_dde_meta(seg, data_referencia),
         "bridge": bridge_resp["statuses"],
         "top_fornecedores": fornecedores,
         "serie": serie,
@@ -684,7 +698,7 @@ def get_comite(data_referencia: datetime.date) -> dict:
     # Nao ha uma meta de DDE geral real (so por segmento) - o legado usa
     # PET FOOD como proxy pra linha de referencia do grafico geral, com
     # fallback 96 (dash_2.html, gerarPPTX(): "ddeMetaGeral").
-    dde_meta_geral = get_dde_meta("PET FOOD", data_referencia) or 96
+    dde_meta_geral = _get_dde_meta("PET FOOD", data_referencia) or 96
 
     # Fornecedores com MENOR DDE (giro mais rapido/risco de ruptura) - usado
     # no card de DDE Geral do PPTX (dash_2.html, gerarPPTX(): "top3DDE").

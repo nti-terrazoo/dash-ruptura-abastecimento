@@ -72,7 +72,7 @@ Constantes de código (não vêm de tabela do banco):
 - **`SEG_METAS`** — meta de % de ruptura por segmento: `FOOD=8, FARMACIA=5, JARDINAGEM=15, AGROPECUARIA=12, HIGIENE E BELEZA=13, ACESSORIOS=20, FAUNA=20, AQUARISMO=15, LAZER=20`. `VALID_SEGMENTOS` é a lista dessas 9 chaves (ordem = ordem de declaração), usada como universo de segmentos conhecidos e para indexar a paleta de cor.
 - **`SEG_ALIAS`** — tabela de normalização de nomes vindos do banco (ex. `"PETFOOD"`/`"PET FOOD"` → `"FOOD"`, `"FARMÁCIA"` → `"FARMACIA"`, `"AGROPECUÁRIA"` → `"AGROPECUARIA"`).
 - **`norm_seg(segmento)`** — normalização usada em **todo** cálculo por segmento: (1) `strip().upper()`; (2) se bate em `SEG_ALIAS`, usa o canônico; (3) senão, remove prefixo `"PET "` (4 chars) ou `"PET"` (3 chars); (4) senão devolve a string original com espaços removidos das pontas. É chamada em praticamente toda função de `dashboard_service.py` que lê a coluna `SEGMENTO`.
-- **`DDE_META_SEG`** — meta mensal de DDE por segmento, 10 valores (março a dezembro de 2026) por segmento (ex. `FOOD: [62,61,61,60,59,59,58,58,58,58]`). `get_dde_meta(segmento, data)` pega `data.month`, usa índice `mês - 3`; se mês < 3 usa o primeiro valor (março), se mês > 12 (nunca acontece na prática) usa o último (dezembro).
+- **Meta de DDE por segmento** — vem da tabela `EPORTAL.DASH_METAS_SEGMENTO` (colunas `SEGMENTO`, `ANO`, `JAN_01`..`DEZ_12`, meta em dias), casada pelo segmento normalizado (`norm_seg`) e pelo `ANO` igual ao ano da data de referência; sem linha para esse ano, não há meta. `get_dde_meta(linha, data)` pega a coluna do mês de `data`; se janeiro/fevereiro estiver nulo ou 0, usa o valor de março. Outro mês nulo/0, ou segmento ausente da tabela, fica sem meta (`None`). A tabela é cacheada com o TTL curto das datas disponíveis.
 - **`BRIDGE_STATUS_DEFS`** — as 5 categorias da "bridge" (waterfall), cada uma com uma lista de substrings (case-insensitive) que casam com o texto livre de `SITUACAO`. **Ordem importa** — a primeira categoria cujo array bate é usada:
   1. `Sit. Crítica c/ Pedido` (`#ff4444`) — `PEDIDO PENDENTE`, `SITUAÇÃO CRÍTICA - PEDIDO`, `SITUACAO CRITICA - PEDIDO`, `- PEDIDO`
   2. `Sit. Crítica s/ Pedido` (`#ff9999`) — `SEM PEDIDO`, `SITUAÇÃO CRÍTICA - SEM`, `SITUACAO CRITICA - SEM`, `- SEM`
@@ -226,7 +226,7 @@ Barra empilhada (`stack`) com um truque de "base invisível": primeiro dataset (
 - `vals = get_segmentos_today(data)[seg]` (mesma função compartilhada da Overview) → `percentual`/`valor` do segmento no dia.
 - `meta = SEG_METAS.get(seg)` (pode ser `None`); `acima_meta = meta is not None and percentual > meta`.
 - `dde`: linha de `get_dde_segmento` casando por `norm_seg`.
-- `dde_meta`: `get_dde_meta(seg, data)` (meta mensal, ver §2).
+- `dde_meta`: meta mensal de `DASH_METAS_SEGMENTO` (ver §2).
 - `cor`: vermelho se acima da meta, senão `segmento_color(seg)`.
 - `bridge`: reusa **inteiramente** `get_bridge(data, mode="segmento", chave=seg)` (mesma fórmula do §7, meta fixa em 10% para o waterfall).
 - **`critico_estimado`**: `{pp: percentual × 0.614, valor: valor × 0.614}` — uma estimativa simplificada de "quanto da ruptura do segmento provavelmente é crítica", usando o fator herdado `CRIT_LEGACY_FACTOR` (sem base de cálculo documentada — ver ressalva no §2). **Este campo é calculado mas não é exibido em nenhum lugar da tela hoje** (`SegmentosPage.tsx` não o renderiza).
