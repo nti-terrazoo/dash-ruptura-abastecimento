@@ -168,3 +168,17 @@ def test_dde_meta_do_service_exige_linha_do_ano_da_referencia():
         assert dashboard_service._get_dde_meta("PET FARMACIA", datetime.date(2026, 10, 1)) == 108
         assert dashboard_service._get_dde_meta("PET FARMACIA", datetime.date(2025, 10, 1)) == 200
         assert dashboard_service._get_dde_meta("PET FARMACIA", datetime.date(2027, 10, 1)) is None
+
+
+def test_get_metas_dde_lista_so_o_ano_e_marca_heranca_de_marco():
+    from unittest.mock import patch
+
+    from app.services import dashboard_service
+
+    rows = [{**_META_ROW, "ano": 2025}, {**_META_ROW, "ano": 2026, "fev_02": 120}]
+    with patch("app.services.raw_data.get_metas_segmento", return_value=rows):
+        resp = dashboard_service.get_metas_dde(datetime.date(2026, 10, 22))
+    assert resp["ano"] == 2026 and len(resp["segmentos"]) == 1
+    jan, fev, *_ = resp["segmentos"][0]["meses"]
+    assert jan == {"mes": 1, "cadastrada": None, "aplicada": 118, "herdada_de_marco": True}
+    assert fev == {"mes": 2, "cadastrada": 120, "aplicada": 120, "herdada_de_marco": False}

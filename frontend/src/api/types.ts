@@ -302,3 +302,23 @@ export interface BriefingResponse {
   itens_sem_pedido: BriefingItemSemPedido[];
   pautas: BriefingPauta[];
 }
+
+export interface MetaDdeMes {
+  mes: number;
+  cadastrada: number | null;
+  aplicada: number | null;
+  herdada_de_marco: boolean;
+}
+
+export interface MetaDdeSegmento {
+  segmento: string;
+  exibido_no_dashboard: boolean;
+  meses: MetaDdeMes[];
+}
+
+export interface MetasDdeResponse {
+  data_referencia: string;
+  ano: number;
+  mes_referencia: number;
+  segmentos: MetaDdeSegmento[];
+}

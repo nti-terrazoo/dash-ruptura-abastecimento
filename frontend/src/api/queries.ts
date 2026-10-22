@@ -11,6 +11,7 @@ import type {
   HealthResponse,
   LojaDetailResponse,
   LojasResponse,
+  MetasDdeResponse,
   OverviewItemCriticoResponse,
   OverviewResponse,
   SegmentoDetailResponse,
@@ -51,6 +52,7 @@ export const queryKeys = {
     ["segmento-series", date, segmento, days, comCd] as const,
   briefing: (date?: string) => ["briefing", date] as const,
   comite: (date?: string) => ["comite", date] as const,
+  metasDde: (date?: string) => ["metas-dde", date] as const,
 };
 
 export function useHealth() {
@@ -229,6 +231,14 @@ export function useComite(date: string | undefined, enabled: boolean) {
     queryKey: queryKeys.comite(date),
     queryFn: () => apiGet<ComiteResponse>("/api/comite", { date }),
     enabled,
+    ...defaultQueryOptions,
+  });
+}
+
+export function useMetasDde(date?: string) {
+  return useQuery({
+    queryKey: queryKeys.metasDde(date),
+    queryFn: () => apiGet<MetasDdeResponse>("/api/metas/dde", { date }),
     ...defaultQueryOptions,
   });
 }

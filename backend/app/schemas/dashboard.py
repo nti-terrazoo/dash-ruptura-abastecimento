@@ -297,3 +297,23 @@ class BriefingResponse(BaseModel):
     melhor_loja: BriefingLoja | None
     itens_sem_pedido: list[BriefingItemSemPedido]
     pautas: list[BriefingPauta]
+
+
+class MetaDdeMes(BaseModel):
+    mes: int
+    cadastrada: float | None
+    aplicada: float | None
+    herdada_de_marco: bool
+
+
+class MetaDdeSegmento(BaseModel):
+    segmento: str
+    exibido_no_dashboard: bool
+    meses: list[MetaDdeMes]
+
+
+class MetasDdeResponse(BaseModel):
+    data_referencia: datetime.date
+    ano: int
+    mes_referencia: int
+    segmentos: list[MetaDdeSegmento]

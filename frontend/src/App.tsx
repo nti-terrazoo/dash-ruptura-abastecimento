@@ -10,6 +10,7 @@ const LojasPage = lazy(() => import("./routes/LojasPage").then((m) => ({ default
 const FornecedoresPage = lazy(() => import("./routes/FornecedoresPage").then((m) => ({ default: m.FornecedoresPage })));
 const BridgePage = lazy(() => import("./routes/BridgePage").then((m) => ({ default: m.BridgePage })));
 const SegmentosPage = lazy(() => import("./routes/SegmentosPage").then((m) => ({ default: m.SegmentosPage })));
+const MetasPage = lazy(() => import("./routes/MetasPage").then((m) => ({ default: m.MetasPage })));
 const CriteriosPage = lazy(() => import("./routes/CriteriosPage").then((m) => ({ default: m.CriteriosPage })));
 
 function RouteFallback() {
@@ -35,6 +36,7 @@ export function App() {
           <Route path="bridge" element={<BridgePage />} />
           <Route path="segmentos" element={<SegmentosIndexRedirect />} />
           <Route path="segmentos/:segmento" element={<SegmentosPage />} />
+          <Route path="metas" element={<MetasPage />} />
           <Route path="criterios" element={<CriteriosPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

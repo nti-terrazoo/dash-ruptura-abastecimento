@@ -94,3 +94,13 @@ export function CalendarIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function MetasIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="12" cy="12" r="5" />
+      <circle cx="12" cy="12" r="1" />
+    </svg>
+  );
+}

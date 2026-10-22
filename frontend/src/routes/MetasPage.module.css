@@ -1,0 +1,112 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 1100px;
+}
+
+.intro {
+  margin: 0 0 10px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.intro:last-child {
+  margin-bottom: 0;
+}
+
+.intro strong {
+  color: var(--g3);
+}
+
+.intro code {
+  font-family: "DM Mono", monospace;
+  font-size: 11px;
+}
+
+.empty {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11.5px;
+}
+
+.table th {
+  text-align: center;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--muted);
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.table th:first-child {
+  text-align: left;
+}
+
+.table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid var(--border2);
+}
+
+.segNome {
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.valor {
+  text-align: center;
+  font-family: "DM Mono", monospace;
+}
+
+.mesAtual {
+  background: var(--bg2);
+  color: var(--g1);
+  font-weight: 700;
+}
+
+.herdada {
+  font-style: italic;
+  color: var(--muted);
+}
+
+.foraDash {
+  opacity: 0.5;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 10px;
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  border: 1px solid var(--border);
+  vertical-align: middle;
+}

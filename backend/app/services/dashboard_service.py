@@ -9,6 +9,7 @@ import datetime
 
 from app.core.business_rules import (
     CRIT_LEGACY_FACTOR,
+    DDE_META_COLUNAS_MES,
     EXCLUDED_BRIDGE_UNIDADES,
     SEG_METAS,
     VALID_SEGMENTOS,
@@ -83,6 +84,34 @@ def _get_dde_meta(seg: str, data_referencia: datetime.date) -> float | None:
         None,
     )
     return get_dde_meta(meta_row, data_referencia)
+
+
+def get_metas_dde(data_referencia: datetime.date) -> dict:
+    """Metas de DDE cadastradas em DASH_METAS_SEGMENTO para o ano da data de
+    referencia, mes a mes. "aplicada" e o valor que o dashboard realmente usa
+    (via get_dde_meta, com jan/fev herdando marco); "cadastrada" e o valor
+    cru da tabela."""
+    ano = data_referencia.year
+    segmentos = []
+    for row in raw_data.get_metas_segmento():
+        if row.get("ano") != ano:
+            continue
+        meses = []
+        for i, coluna in enumerate(DDE_META_COLUNAS_MES):
+            aplicada = get_dde_meta(row, datetime.date(ano, i + 1, 1))
+            cadastrada = row.get(coluna)
+            meses.append(
+                {
+                    "mes": i + 1,
+                    "cadastrada": cadastrada,
+                    "aplicada": aplicada,
+                    "herdada_de_marco": i < 2 and not cadastrada and aplicada is not None,
+                }
+            )
+        seg = norm_seg(row.get("segmento"))
+        segmentos.append({"segmento": seg, "exibido_no_dashboard": seg in VALID_SEGMENTOS, "meses": meses})
+    segmentos.sort(key=lambda s: (not s["exibido_no_dashboard"], s["segmento"]))
+    return {"data_referencia": data_referencia, "ano": ano, "mes_referencia": data_referencia.month, "segmentos": segmentos}
 
 
 def get_segmentos_today(data_referencia: datetime.date) -> dict[str, dict]:

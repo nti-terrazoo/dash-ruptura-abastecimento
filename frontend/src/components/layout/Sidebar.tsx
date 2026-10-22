@@ -13,6 +13,7 @@ import {
   ChevronIcon,
   FornecedoresIcon,
   LojasIcon,
+  MetasIcon,
   OverviewIcon,
   RefreshIcon,
   SegmentosIcon,
@@ -25,6 +26,7 @@ const NAV_ITEMS = [
   { to: "/fornecedores", label: "Fornecedores", icon: FornecedoresIcon, end: false },
   { to: "/bridge", label: "Bridge / CD", icon: BridgeIcon, end: false },
   { to: "/segmentos", label: "Rupt. Segmentos", icon: SegmentosIcon, end: false },
+  { to: "/metas", label: "Metas DDE", icon: MetasIcon, end: false },
 ];
 
 export function Sidebar() {
